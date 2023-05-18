@@ -11,4 +11,12 @@ public class UserMapper {
                 .email(user.getEmail() != null ? user.getEmail() : null)
                 .build();
     }
+
+    public static User toUser(UserDto userDto, Long userId) {
+        return User.builder()
+                .id(userId)
+                .name(userDto.getName() != null ? userDto.getName() : null)
+                .email(userDto.getEmail() != null ? userDto.getEmail() : null)
+                .build();
+    }
 }
