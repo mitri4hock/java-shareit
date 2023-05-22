@@ -16,7 +16,7 @@ public class UserMapper {
         return User.builder()
                 .id(userId)
                 .name(userDto.getName() != null ? userDto.getName() : null)
-                .email(userDto.getEmail() != null ? userDto.getEmail() : null)
+                .email(userDto.getEmail())
                 .build();
     }
 }

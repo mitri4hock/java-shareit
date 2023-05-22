@@ -18,8 +18,7 @@ public class Item {
     private String name;
     private String description;
     @NotNull
-    @Builder.Default
-    private Boolean available = false;
+    private Boolean available;
     @NotNull
     private Long owner;
     private Long request;

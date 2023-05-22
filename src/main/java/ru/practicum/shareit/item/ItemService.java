@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.util.Set;
 
@@ -14,10 +15,12 @@ import java.util.Set;
 public class ItemService {
 
     private final ItemStorage itemStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    ItemService(ItemStorage itemStorage) {
+    ItemService(ItemStorage itemStorage, UserStorage userStorage) {
         this.itemStorage = itemStorage;
+        this.userStorage = userStorage;
     }
 
     public ItemDto createItem(ItemDto itemDto, Long userId) {
@@ -26,6 +29,16 @@ public class ItemService {
         }
         if (itemDto == null) {
             throw new BadParametrException("при создании вещи не было передано тело запроса");
+        }
+        if (userStorage.getUserById(userId) == null) {
+            throw new BadParametrException("при создании вещи, был указан несуществующий пользователь владелец");
+        }
+        if (itemDto.getAvailable() == null) {
+            throw new BadParametrException("при создании вещи не был указан статус доступности");
+        }
+        if (itemDto.getName().isBlank() || itemDto.getDescription().isBlank()) {
+            throw new BadParametrException("при создании вещи был указан пустой параметр имени или описания. item: " +
+                    itemDto);
         }
         return itemStorage.createItem(itemDto, userId);
     }

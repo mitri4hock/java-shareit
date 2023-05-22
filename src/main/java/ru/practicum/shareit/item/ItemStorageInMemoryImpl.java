@@ -67,7 +67,7 @@ public class ItemStorageInMemoryImpl implements ItemStorage {
 
     @Override
     public Set<ItemDto> findItem(String text) {
-        String query = "*" + text.toLowerCase().trim() + "*";
+        String query = text.toLowerCase().trim();
         return storage.values().stream()
                 .filter(x -> x.getAvailable() == true)
                 .filter(x -> x.getName().toLowerCase().contains(query)

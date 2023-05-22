@@ -21,15 +21,15 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto createItem(@RequestBody ItemDto itemDto
-            , @RequestHeader(value = "X-Sharer-User-Id", defaultValue = "-1") Long userId) {
+    public ItemDto createItem(@RequestBody ItemDto itemDto,
+                              @RequestHeader(value = "X-Sharer-User-Id", defaultValue = "-1") Long userId) {
         return itemService.createItem(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto patchItem(@RequestBody ItemDto itemDto
-            , @RequestHeader(value = "X-Sharer-User-Id", defaultValue = "-1") Long userId
-            , @PathVariable Long itemId) {
+    public ItemDto patchItem(@RequestBody ItemDto itemDto,
+                             @RequestHeader(value = "X-Sharer-User-Id", defaultValue = "-1") Long userId,
+                             @PathVariable Long itemId) {
         return itemService.patchItem(itemDto, userId, itemId);
     }
 
@@ -51,14 +51,14 @@ public class ItemController {
      * содержащие этот текст в названии или описании. Происходит по эндпойнту /items/search?text={text},
      * в text передаётся текст для поиска. Проверьте, что поиск возвращает только доступные для аренды вещи.
      */
-    @GetMapping("search?text={text}")
-    public Set<ItemDto> findItem(@RequestParam(value = "text") String text){
+    @GetMapping("/search") //search?text={text}
+    public Set<ItemDto> findItem(@RequestParam(value = "text") String text) {
         return itemService.findItem(text);
 
     }
 
     @DeleteMapping("/{itemId}")
-    public ItemDto deleteItem(@PathVariable Long itemId){
+    public ItemDto deleteItem(@PathVariable Long itemId) {
         return itemService.deleteItem(itemId);
     }
 
