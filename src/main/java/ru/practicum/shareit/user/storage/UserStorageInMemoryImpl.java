@@ -36,7 +36,7 @@ public class UserStorageInMemoryImpl implements UserStorage {
     @Override
     public Boolean isUsersEmailDuplicate(UserDto userDto) {
         return storage.values().stream()
-                .anyMatch(x -> x.getEmail().equals(userDto.getEmail()) && x.getId() != userDto.getId())
+                .anyMatch(x -> x.getEmail().equals(userDto.getEmail()) && !x.getId().equals(userDto.getId()))
                 ;
     }
 

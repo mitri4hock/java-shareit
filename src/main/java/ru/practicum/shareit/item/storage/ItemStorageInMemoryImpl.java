@@ -58,7 +58,7 @@ public class ItemStorageInMemoryImpl implements ItemStorage {
     @Override
     public Set<ItemDto> getAllMyItems(Long userId) {
         return storage.values().stream()
-                .filter(x -> x.getOwner() == userId)
+                .filter(x -> x.getOwner().equals(userId))
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toSet());
 

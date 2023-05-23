@@ -65,7 +65,7 @@ public class ItemService {
             log.info("Попытка запросить редактирование отсутствующей вещи. itemId= " + itemId);
             throw new BadParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
         }
-        if (userId != tempItem.getOwner()) {
+        if (!userId.equals(tempItem.getOwner())) {
             log.info("Попытка редактировать вещь не её владельцем. Полученный владелец: "
                     + userId + " , текущий владелец: " + tempItem.getOwner());
             throw new NotFoundParametrException("Редактировать вещь может только её владелец. Полученный владелец: "
