@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Set;
 

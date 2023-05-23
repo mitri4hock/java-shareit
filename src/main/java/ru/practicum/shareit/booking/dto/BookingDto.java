@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.booking.EnumStatusBooking;
+import ru.practicum.shareit.booking.model.EnumStatusBooking;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
