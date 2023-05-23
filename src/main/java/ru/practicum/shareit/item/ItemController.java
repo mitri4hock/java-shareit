@@ -4,11 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 
+import java.util.List;
 import java.util.Set;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @RestController
 @RequestMapping("/items")
 public class ItemController {
@@ -38,21 +37,13 @@ public class ItemController {
         return itemService.getItem(itemId);
     }
 
-    /**
-     * Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
-     */
     @GetMapping
     public Set<ItemDto> getAllMyItems(@RequestHeader(value = "X-Sharer-User-Id", defaultValue = "-1") Long userId) {
         return itemService.getAllMyItems(userId);
     }
 
-    /**
-     * Поиск вещи потенциальным арендатором. Пользователь передаёт в строке запроса текст, и система ищет вещи,
-     * содержащие этот текст в названии или описании. Происходит по эндпойнту /items/search?text={text},
-     * в text передаётся текст для поиска. Проверьте, что поиск возвращает только доступные для аренды вещи.
-     */
     @GetMapping("/search") //search?text={text}
-    public Set<ItemDto> findItem(@RequestParam(value = "text") String text) {
+    public List<ItemDto> findItem(@RequestParam(value = "text") String text) {
         return itemService.findItem(text);
 
     }

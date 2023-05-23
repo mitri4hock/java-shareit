@@ -7,9 +7,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Data
 @Builder
 public class ItemRequest {

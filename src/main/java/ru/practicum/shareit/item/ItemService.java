@@ -4,10 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.BadParametrException;
+import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserStorage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -31,13 +34,17 @@ public class ItemService {
             throw new BadParametrException("при создании вещи не было передано тело запроса");
         }
         if (userStorage.getUserById(userId) == null) {
-            throw new BadParametrException("при создании вещи, был указан несуществующий пользователь владелец");
+            throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
         }
         if (itemDto.getAvailable() == null) {
             throw new BadParametrException("при создании вещи не был указан статус доступности");
         }
-        if (itemDto.getName().isBlank() || itemDto.getDescription().isBlank()) {
-            throw new BadParametrException("при создании вещи был указан пустой параметр имени или описания. item: " +
+        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
+            throw new BadParametrException("при создании вещи был указан пустой параметр имени. item: " +
+                    itemDto);
+        }
+        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            throw new BadParametrException("при создании вещи был указан пустой параметр описания. item: " +
                     itemDto);
         }
         return itemStorage.createItem(itemDto, userId);
@@ -60,7 +67,7 @@ public class ItemService {
         if (userId != tempItem.getOwner()) {
             log.info("Попытка редактировать вещь не её владельцем. Полученный владелец: "
                     + userId + " , текущий владелец: " + tempItem.getOwner());
-            throw new BadParametrException("Редактировать вещь может только её владелец. Полученный владелец: "
+            throw new NotFoundParametrException("Редактировать вещь может только её владелец. Полученный владелец: "
                     + userId + " , текущий владелец: " + tempItem.getOwner());
         }
         return itemStorage.patchItem(itemDto, itemId);
@@ -82,9 +89,9 @@ public class ItemService {
         return itemStorage.getAllMyItems(userId);
     }
 
-    public Set<ItemDto> findItem(String text) {
+    public List<ItemDto> findItem(String text) {
         if (text.isBlank()) {
-            throw new BadParametrException("передан пустой параметр text");
+            return new ArrayList<>();
         }
         return itemStorage.findItem(text);
     }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.BadParametrException;
+import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Set;
@@ -23,7 +24,7 @@ public class UserService {
             throw new BadParametrException("при создании пользователя передано пустое тело запроса");
         }
         if (userStorage.isUsersEmailDuplicate(userDto)) {
-            throw new BadParametrException("при создании пользователя передан Email уже существующего пользователя");
+            throw new ConflictParametrException("при создании пользователя передан Email уже существующего пользователя");
         }
         return userStorage.createUser(userDto);
     }
@@ -39,7 +40,7 @@ public class UserService {
         }
         userDto.setId(userId);
         if (userStorage.isUsersEmailDuplicate(userDto)) {
-            throw new BadParametrException("при обновлении пользователя передан Email уже существующего пользователя");
+            throw new ConflictParametrException("при обновлении пользователя передан Email уже существующего пользователя");
         }
         return userStorage.patchUser(userDto, userId);
     }

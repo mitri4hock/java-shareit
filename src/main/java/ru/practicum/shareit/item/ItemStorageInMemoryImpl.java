@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -66,14 +64,16 @@ public class ItemStorageInMemoryImpl implements ItemStorage {
     }
 
     @Override
-    public Set<ItemDto> findItem(String text) {
+    public List<ItemDto> findItem(String text) {
         String query = text.toLowerCase().trim();
-        return storage.values().stream()
+        var rez = storage.values().stream()
                 .filter(x -> x.getAvailable() == true)
                 .filter(x -> x.getName().toLowerCase().contains(query)
                         || x.getDescription().toLowerCase().contains(query))
+                .sorted(Comparator.comparing(Item::getId))
                 .map(ItemMapper::toItemDto)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
+        return rez;
     }
 
     @Override

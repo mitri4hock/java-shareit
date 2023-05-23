@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.List;
 import java.util.Set;
 
 public interface ItemStorage {
@@ -14,7 +15,7 @@ public interface ItemStorage {
 
     Set<ItemDto> getAllMyItems(Long userId);
 
-    Set<ItemDto> findItem(String text);
+    List<ItemDto> findItem(String text);
 
     ItemDto deleteItem(Long itemId);
 }
