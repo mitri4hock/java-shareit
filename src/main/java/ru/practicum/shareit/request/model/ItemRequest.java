@@ -1,22 +1,20 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.request.model;
 
 import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
+import java.util.Date;
 
 @Data
 @Builder
-public class Item {
+public class ItemRequest {
     @Min(0)
     private Long id;
-    private String name;
     private String description;
+    @Min(0)
+    private Long requestor;
     @NotNull
-    private Boolean available;
-    @NotNull
-    private Long owner;
-    private Long request;
+    private Date created;
 }

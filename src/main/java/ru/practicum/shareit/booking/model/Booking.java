@@ -1,8 +1,7 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.booking.model;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.booking.model.EnumStatusBooking;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -10,7 +9,7 @@ import java.util.Date;
 
 @Data
 @Builder
-public class BookingDto {
+public class Booking {
     @Min(0)
     private Long id;
     @NotNull
@@ -23,4 +22,5 @@ public class BookingDto {
     private Long booker;
     @NotNull
     private EnumStatusBooking status;
+
 }
