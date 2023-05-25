@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.storage;
 
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface UserStorage {
@@ -10,7 +11,7 @@ public interface UserStorage {
 
     Boolean isUsersEmailDuplicate(UserDto userDto);
 
-    UserDto getUserById(Long userId);
+    Optional<UserDto> getUserById(Long userId);
 
     UserDto patchUser(UserDto userDto, Long userId);
 

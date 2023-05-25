@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class UserStorageInMemoryImpl implements UserStorage {
         storage.put(currentUserId, UserMapper.toUser(userDto, currentUserId));
         currentUserId++;
         User rezultToReturn = storage.get(currentUserId - 1);
-        log.info("добавлен пользователь: " + rezultToReturn);
+        log.info("добавлен пользователь: {}", rezultToReturn);
         return UserMapper.toUserDto(rezultToReturn);
     }
 
@@ -41,8 +42,12 @@ public class UserStorageInMemoryImpl implements UserStorage {
     }
 
     @Override
-    public UserDto getUserById(Long userId) {
-        return UserMapper.toUserDto(storage.getOrDefault(userId, null));
+    public Optional<UserDto> getUserById(Long userId) {
+        var preRez = storage.getOrDefault(userId, null);
+        if (preRez == null) {
+            return Optional.empty();
+        }
+        return Optional.of(UserMapper.toUserDto(preRez));
     }
 
     @Override
@@ -50,11 +55,11 @@ public class UserStorageInMemoryImpl implements UserStorage {
         User patchingUser = storage.get(userId);
         if (userDto.getName() != null) {
             patchingUser.setName(userDto.getName());
-            log.info("у пользователя с id " + userId + "заменено имя на " + patchingUser.getName());
+            log.info("у пользователя с id {} заменено имя на {}", userId, patchingUser.getName());
         }
         if (userDto.getEmail() != null) {
             patchingUser.setEmail(userDto.getEmail());
-            log.info("у пользователя с id " + userId + "заменено имя на " + patchingUser.getEmail());
+            log.info("у пользователя с id {} заменено имя на {}", userId, patchingUser.getEmail());
         }
         return UserMapper.toUserDto(patchingUser);
     }

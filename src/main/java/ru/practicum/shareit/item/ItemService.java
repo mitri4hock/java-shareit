@@ -8,10 +8,12 @@ import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -27,66 +29,40 @@ public class ItemService {
         this.userStorage = userStorage;
     }
 
+    public Optional<UserDto> getUserById(Long userId) {
+        return userStorage.getUserById(userId);
+    }
+
     public ItemDto createItem(ItemDto itemDto, Long userId) {
-        if (userId == -1L) {
-            throw new BadParametrException("при создании вещи не был передан параметр X-Sharer-User-Id");
-        }
-        if (itemDto == null) {
-            throw new BadParametrException("при создании вещи не было передано тело запроса");
-        }
-        if (userStorage.getUserById(userId) == null) {
-            throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
-        }
-        if (itemDto.getAvailable() == null) {
-            throw new BadParametrException("при создании вещи не был указан статус доступности");
-        }
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new BadParametrException("при создании вещи был указан пустой параметр имени. item: " +
-                    itemDto);
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new BadParametrException("при создании вещи был указан пустой параметр описания. item: " +
-                    itemDto);
-        }
         return itemStorage.createItem(itemDto, userId);
     }
 
     public ItemDto patchItem(ItemDto itemDto, Long userId, Long itemId) {
-        if (userId == -1L) {
-            throw new BadParametrException("при обновлении вещи не был передан параметр X-Sharer-User-Id");
-        }
-        if (itemDto == null || itemId == null) {
-            throw new BadParametrException("при обновлении вещи были переданы неверные параметры: "
-                    + "item= " + itemDto + " , itemId=" + itemId);
-        }
 
-        Item tempItem = itemStorage.getItem(itemId);
-        if (tempItem == null) {
-            log.info("Попытка запросить редактирование отсутствующей вещи. itemId= " + itemId);
+        Optional<Item> tempItem = itemStorage.getItem(itemId);
+        if (tempItem.isEmpty()) {
+            log.info("Попытка запросить редактирование отсутствующей вещи. itemId= {}", itemId);
             throw new BadParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
         }
-        if (!userId.equals(tempItem.getOwner())) {
-            log.info("Попытка редактировать вещь не её владельцем. Полученный владелец: "
-                    + userId + " , текущий владелец: " + tempItem.getOwner());
+        if (!userId.equals(tempItem.get().getOwner())) {
+            log.info("Попытка редактировать вещь не её владельцем. Полученный владелец: {}"
+                    + " , текущий владелец: {}", userId, tempItem.get().getOwner());
             throw new NotFoundParametrException("Редактировать вещь может только её владелец. Полученный владелец: "
-                    + userId + " , текущий владелец: " + tempItem.getOwner());
+                    + userId + " , текущий владелец: " + tempItem.get().getOwner());
         }
         return itemStorage.patchItem(itemDto, itemId);
     }
 
     public ItemDto getItem(Long itemId) {
-        Item tempItem = itemStorage.getItem(itemId);
-        if (tempItem == null) {
-            log.info("Попытка запросить отсутствующую вещь. itemId= " + itemId);
+        Optional<Item> tempItem = itemStorage.getItem(itemId);
+        if (tempItem.isEmpty()) {
+            log.info("Попытка запросить отсутствующую вещь. itemId= {}", itemId);
             throw new BadParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
         }
-        return ItemMapper.toItemDto(tempItem);
+        return ItemMapper.toItemDto(tempItem.get());
     }
 
     public Set<ItemDto> getAllMyItems(Long userId) {
-        if (userId == -1L) {
-            throw new BadParametrException("при запросе всех вещей владельца не был передан параметр X-Sharer-User-Id");
-        }
         return itemStorage.getAllMyItems(userId);
     }
 
