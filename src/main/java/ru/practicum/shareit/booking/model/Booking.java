@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @Builder
 public class Booking {
-    @Min(0)
+    @Min(1)
     private Long id;
     @NotNull
     private Date start;
