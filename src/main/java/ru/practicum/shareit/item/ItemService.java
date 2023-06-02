@@ -8,7 +8,9 @@ import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
@@ -20,17 +22,22 @@ import java.util.Set;
 @Slf4j
 public class ItemService {
 
-    private final ItemStorage itemStorage;
-    private final UserStorage userStorage;
+
+    private ItemStorage itemStorage;
+    private UserStorage userStorage;
 
     @Autowired
-    ItemService(ItemStorage itemStorage, UserStorage userStorage) {
+    public ItemService(ItemStorage itemStorage, UserStorage userStorage) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
     }
 
     public Optional<UserDto> getUserById(Long userId) {
-        return userStorage.getUserById(userId);
+        Optional<User> rezQuery = userStorage.findById(userId);
+        if (rezQuery.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(UserMapper.toUserDto(rezQuery.get()));
     }
 
     public ItemDto createItem(ItemDto itemDto, Long userId) {

@@ -6,9 +6,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -24,8 +26,8 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-        return userService.createUser(userDto);
+    public UserDto createUser(@Valid @RequestBody User user) {
+        return userService.createUser(user);
     }
 
     @PatchMapping("/{userId}")
@@ -44,12 +46,12 @@ public class UserController {
     }
 
     @GetMapping
-    public Set<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @DeleteMapping("/{userId}")
-    public UserDto deleteUserById(@PathVariable Long userId) {
-        return userService.deleteUserById(userId);
+    public void deleteUserById(@PathVariable Long userId) {
+        userService.deleteUserById(userId);
     }
 }
