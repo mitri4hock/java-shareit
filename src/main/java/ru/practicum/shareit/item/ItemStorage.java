@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.storage;
+package ru.practicum.shareit.item;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,7 +16,8 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
 
     List<Item> findByOwner_id(Long userId);
 
-    List<Item> findByNameLikeIgnoreCaseOrDescriptionLikeIgnoreCaseAndAvailableTrue(String name, String description);
+    List<Item> findByNameLikeIgnoreCaseOrDescriptionLikeIgnoreCase(String name, String description);
+
 
     List<Item> findByName(String name);
 

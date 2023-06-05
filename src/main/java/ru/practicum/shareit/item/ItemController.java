@@ -27,7 +27,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto createItem(@RequestBody Item item,
+    public ItemDto createItem(@RequestBody @Valid Item item,
                               @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
 
         if (item == null) {

@@ -7,7 +7,6 @@ import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -81,7 +80,7 @@ public class ItemService {
         Optional<Item> tempItem = itemStorage.findById(itemId);
         if (tempItem.isEmpty()) {
             log.info("Попытка запросить отсутствующую вещь. itemId= {}", itemId);
-            throw new BadParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
+            throw new NotFoundParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
         }
         return ItemMapper.toItemDto(tempItem.get());
     }
@@ -97,7 +96,10 @@ public class ItemService {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemStorage.findByNameLikeIgnoreCaseOrDescriptionLikeIgnoreCaseAndAvailableTrue(text, text).stream()
+        text = '%' + text + '%';
+        var preRez = itemStorage.findByNameLikeIgnoreCaseOrDescriptionLikeIgnoreCase(text, text);
+        return preRez.stream()
+                .filter(Item::getAvailable)
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
