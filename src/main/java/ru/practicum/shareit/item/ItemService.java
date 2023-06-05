@@ -11,12 +11,12 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -40,28 +40,45 @@ public class ItemService {
         return Optional.of(UserMapper.toUserDto(rezQuery.get()));
     }
 
-    public ItemDto createItem(ItemDto itemDto, Long userId) {
-        return itemStorage.createItem(itemDto, userId);
+    public ItemDto createItem(Item item, Long userId) {
+        Item result = item;
+        result.setOwner(userStorage.findById(userId).get());
+        return ItemMapper.toItemDto(itemStorage.save(result));
     }
 
-    public ItemDto patchItem(ItemDto itemDto, Long userId, Long itemId) {
+    public ItemDto patchItem(Item item, Long userId, Long itemId) {
 
-        Optional<Item> tempItem = itemStorage.getItem(itemId);
+        Optional<Item> tempItem = itemStorage.findById(itemId);
         if (tempItem.isEmpty()) {
             log.info("Попытка запросить редактирование отсутствующей вещи. itemId= {}", itemId);
             throw new BadParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
         }
-        if (!userId.equals(tempItem.get().getOwner())) {
+        if (!userId.equals(tempItem.get().getOwner().getId())) {
             log.info("Попытка редактировать вещь не её владельцем. Полученный владелец: {}"
                     + " , текущий владелец: {}", userId, tempItem.get().getOwner());
             throw new NotFoundParametrException("Редактировать вещь может только её владелец. Полученный владелец: "
                     + userId + " , текущий владелец: " + tempItem.get().getOwner());
         }
-        return itemStorage.patchItem(itemDto, itemId);
+
+        if (item.getName() != null) {
+            tempItem.get().setName(item.getName());
+            log.info("у вещи с id {} заменено название на {}", itemId, tempItem.get().getName());
+        }
+        if (item.getDescription() != null) {
+            tempItem.get().setDescription(item.getDescription());
+            log.info("у вещи с id {} заменено описание на {}", itemId, tempItem.get().getDescription());
+        }
+        if (item.getAvailable() != null) {
+            tempItem.get().setAvailable(item.getAvailable());
+            log.info("у вещи с id {} заменен статус на {}", itemId, tempItem.get().getAvailable());
+        }
+
+
+        return ItemMapper.toItemDto(itemStorage.save(tempItem.get()));
     }
 
     public ItemDto getItem(Long itemId) {
-        Optional<Item> tempItem = itemStorage.getItem(itemId);
+        Optional<Item> tempItem = itemStorage.findById(itemId);
         if (tempItem.isEmpty()) {
             log.info("Попытка запросить отсутствующую вещь. itemId= {}", itemId);
             throw new BadParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
@@ -69,18 +86,23 @@ public class ItemService {
         return ItemMapper.toItemDto(tempItem.get());
     }
 
-    public Set<ItemDto> getAllMyItems(Long userId) {
-        return itemStorage.getAllMyItems(userId);
+    public List<ItemDto> getAllMyItems(Long userId) {
+        return itemStorage.findByOwner_id(userId).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+
     }
 
     public List<ItemDto> findItem(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemStorage.findItem(text);
+        return itemStorage.findByNameLikeIgnoreCaseOrDescriptionLikeIgnoreCaseAndAvailableTrue(text, text).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
-    public ItemDto deleteItem(Long itemId) {
-        return itemStorage.deleteItem(itemId);
+    public void deleteItem(Long itemId) {
+        itemStorage.deleteById(itemId);
     }
 }

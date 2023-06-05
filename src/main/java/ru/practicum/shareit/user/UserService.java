@@ -6,11 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,25 +20,21 @@ public class UserService {
 
 
     public UserDto createUser(User user) {
-        if (isUsersEmailDuplicate(user)) {
-            throw new ConflictParametrException("при создании пользователя передан Email уже существующего пользователя");
-        }
+//        if (isUsersEmailDuplicate(user).size() != 0) {
+//            throw new ConflictParametrException("при создании пользователя передан Email уже существующего пользователя");
+//        }
         return UserMapper.toUserDto(userStorage.save(user));
     }
 
-    public UserDto patchUser(UserDto userDto, Long userId) {
-        userDto.setId(userId);
-        if (isUsersEmailDuplicate(UserMapper.toUser(userDto, userId))) {
-            throw new ConflictParametrException("при обновлении пользователя передан Email уже существующего пользователя");
-        }
+    public UserDto patchUser(User user, Long userId) {
 
         User patchingUser = userStorage.findById(userId).get();
-        if (userDto.getName() != null) {
-            patchingUser.setName(userDto.getName());
+        if (user.getName() != null) {
+            patchingUser.setName(user.getName());
             log.info("у пользователя с id {} заменено имя на {}", userId, patchingUser.getName());
         }
-        if (userDto.getEmail() != null) {
-            patchingUser.setEmail(userDto.getEmail());
+        if (user.getEmail() != null) {
+            patchingUser.setEmail(user.getEmail());
             log.info("у пользователя с id {} заменено имя на {}", userId, patchingUser.getEmail());
         }
         userStorage.save(patchingUser);
@@ -66,7 +60,7 @@ public class UserService {
         userStorage.deleteById(userId);
     }
 
-    private boolean isUsersEmailDuplicate(User user) {
-        return userStorage.findByEmailContainingIgnoreCase(user.getEmail()).size() != 0;
+    private List<User> isUsersEmailDuplicate(User user) {
+        return userStorage.findByEmailContainingIgnoreCase(user.getEmail());
     }
 }

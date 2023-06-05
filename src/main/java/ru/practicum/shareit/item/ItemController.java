@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -26,25 +27,25 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto createItem(@RequestBody @Valid ItemDto itemDto,
+    public ItemDto createItem(@RequestBody Item item,
                               @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
 
-        if (itemDto == null) {
+        if (item == null) {
             throw new BadParametrException("при создании вещи не было передано тело запроса");
         }
         if (itemService.getUserById(userId).isEmpty()) {
             throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
         }
 
-        return itemService.createItem(itemDto, userId);
+        return itemService.createItem(item, userId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto patchItem(@RequestBody @NotNull ItemDto itemDto,
+    public ItemDto patchItem(@RequestBody @NotNull Item item,
                              @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId,
                              @PathVariable @NotNull Long itemId) {
 
-        return itemService.patchItem(itemDto, userId, itemId);
+        return itemService.patchItem(item, userId, itemId);
     }
 
     @GetMapping("/{itemId}")
@@ -53,7 +54,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Set<ItemDto> getAllMyItems(@RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
+    public List<ItemDto> getAllMyItems(@RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
         return itemService.getAllMyItems(userId);
     }
 
@@ -64,8 +65,8 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public ItemDto deleteItem(@PathVariable Long itemId) {
-        return itemService.deleteItem(itemId);
+    public void deleteItem(@PathVariable Long itemId) {
+        itemService.deleteItem(itemId);
     }
 
 }

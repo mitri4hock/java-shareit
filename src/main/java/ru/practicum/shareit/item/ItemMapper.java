@@ -14,21 +14,21 @@ public class ItemMapper {
                 .name(item.getName() != null ? item.getName() : valueIfNotProvided)
                 .description(item.getDescription() != null ? item.getDescription() : valueIfNotProvided)
                 .available(item.getAvailable())
-                .owner(item.getOwner())
-                .request(item.getRequest() != null ? item.getRequest() : valueIfNotProvidedRequest)
+                .owner(item.getOwner().getId())
+                //.request(item.getRequest() != null ? item.getRequest().getId() : valueIfNotProvidedRequest)
                 .build()
                 ;
     }
 
-    public static Item toItem(ItemDto itemDto, Long itemId, Long userId) {
-        return Item.builder()
-                .id(itemId)
-                .name(itemDto.getName() != null ? itemDto.getName() : valueIfNotProvided)
-                .description(itemDto.getDescription() != null ? itemDto.getDescription() : valueIfNotProvided)
-                .available(itemDto.getAvailable())
-                .owner(userId)
-                .request(itemDto.getRequest() != null ? itemDto.getRequest() : valueIfNotProvidedRequest)
-                .build()
-                ;
-    }
+//    public static Item toItem(ItemDto itemDto, Long itemId, Long userId) {
+//        return Item.builder()
+//                .id(itemId)
+//                .name(itemDto.getName() != null ? itemDto.getName() : valueIfNotProvided)
+//                .description(itemDto.getDescription() != null ? itemDto.getDescription() : valueIfNotProvided)
+//                .available(itemDto.getAvailable())
+//                .owner(userId)
+//                .request(itemDto.getRequest() != null ? itemDto.getRequest() : valueIfNotProvidedRequest)
+//                .build()
+//                ;
+//    }
 }

@@ -16,11 +16,5 @@ public class UserMapper {
                 .build();
     }
 
-    public static User toUser(UserDto userDto, Long userId) {
-        return User.builder()
-                .id(userId)
-                .name(userDto.getName() != null ? userDto.getName() : valueIfNotProvided)
-                .email(userDto.getEmail())
-                .build();
-    }
+
 }

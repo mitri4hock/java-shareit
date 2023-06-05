@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "users", schema = "public")
 @Getter @Setter @ToString @EqualsAndHashCode
-@Builder
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,5 +22,6 @@ public class User {
     private String name;
     @Column(name = "email", nullable = false)
     @Email
+    @NotNull
     private String email;
 }
