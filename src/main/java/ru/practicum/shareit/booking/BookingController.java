@@ -99,6 +99,7 @@ public class BookingController {
      * Этот запрос имеет смысл для владельца хотя бы одной вещи. Работа параметра state аналогична его работе в
      * предыдущем сценарии.
      */
+    @SuppressWarnings("checkstyle:WhitespaceAround")
     @GetMapping("/owner")
     public List<BookingDto> findAllBookingForUserWithStatus(
             @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
@@ -106,7 +107,7 @@ public class BookingController {
         if (userService.getUserById(userId).isEmpty()) {
             throw new BadParametrException("Запрошены бронирования от несуществующего пользователя. Id = " + userId);
         }
-        if (bookingService.countItemForUser(userId) == 0L){
+        if (bookingService.countItemForUser(userId) == 0L) {
             return new ArrayList<>();
         }
         return bookingService.findAllBookingForUserWithStatus(userId, state);

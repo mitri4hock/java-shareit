@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoLastNextBooking;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.Valid;
@@ -54,7 +55,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllMyItems(@RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
+    public List<ItemDtoLastNextBooking> getAllMyItems(@RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
         return itemService.getAllMyItems(userId);
     }
 

@@ -17,7 +17,6 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     Optional<Booking> findById(Long id);
 
 
-
     @Query("Select *" +
             " from booking b left join item i on b.item_id = i.id " +
             " where i.id = ?1 " +
@@ -88,18 +87,34 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             " Order by b.start_date desc ")
     List<Booking> findAllBookingByBookerFuture(Long bookerId);
 
-    @Query("Select *" +
+    @Query("Select * " +
             " from booking b " +
             " where booker_id = ?1 " +
             " and b.status = 'WAITING' " +
             " Order by b.start_date desc ")
     List<Booking> findAllBookingByBookerWaiting(Long bookerId);
 
-    @Query("Select *" +
+    @Query("Select * " +
             " from booking b " +
             " where booker_id = ?1 " +
             " and b.status = 'REJECTED' " +
             " Order by b.start_date desc ")
     List<Booking> findAllBookingByBookerRejected(Long bookerId);
+
+    @Query("Select * " +
+            " from booking b " +
+            " where item_id = ?1 " +
+            " and b.start_date > now() " +
+            " Order by b.start_date " +
+            " limit 1 ")
+    Booking findNextBookingById(Long itemId);
+
+    @Query("Select * " +
+            " from booking b " +
+            " where item_id = ?1 " +
+            " and b.start_date > now() " +
+            " Order by b.start_date desc " +
+            " limit 1 ")
+    Booking findLastBookingById(Long itemId);
 
 }

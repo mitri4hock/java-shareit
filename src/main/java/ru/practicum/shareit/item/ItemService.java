@@ -3,9 +3,12 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoLastNextBooking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -24,11 +27,13 @@ public class ItemService {
 
     private ItemStorage itemStorage;
     private UserStorage userStorage;
+    private BookingStorage bookingStorage;
 
     @Autowired
-    public ItemService(ItemStorage itemStorage, UserStorage userStorage) {
+    public ItemService(ItemStorage itemStorage, UserStorage userStorage, BookingStorage bookingStorage) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
+        this.bookingStorage = bookingStorage;
     }
 
     public Optional<UserDto> getUserById(Long userId) {
@@ -85,9 +90,11 @@ public class ItemService {
         return ItemMapper.toItemDto(tempItem.get());
     }
 
-    public List<ItemDto> getAllMyItems(Long userId) {
+    public List<ItemDtoLastNextBooking> getAllMyItems(Long userId) {
         return itemStorage.findByOwner_id(userId).stream()
-                .map(ItemMapper::toItemDto)
+                .map(o -> ItemMapper.toItemDtoLastNextBooking(o,
+                        BookingMapper.toBookingDto(bookingStorage.findLastBookingById(o.getId())),
+                        BookingMapper.toBookingDto(bookingStorage.findLastBookingById(o.getId()))))
                 .collect(Collectors.toList());
 
     }
