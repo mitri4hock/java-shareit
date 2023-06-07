@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoForCreate;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
@@ -13,6 +15,7 @@ import ru.practicum.shareit.user.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,19 +35,27 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingDto createBooking(@RequestBody @Valid Booking booking,
+    public BookingDto createBooking(@RequestBody BookingDtoForCreate bookingDtoCreate,
                                     @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-        if (booking == null) {
+        if (bookingDtoCreate == null) {
             throw new BadParametrException("при бронировании не было передано тело запроса");
         }
-        if (itemService.getItem(booking.getItemId().getId()).getId() == null) {
+        var item = itemService.getItem(bookingDtoCreate.getItemId());
+        if (item == null) {
             throw new NotFoundParametrException("при бронировании, была указана несуществующая вещь");
+        }
+        if (!item.getAvailable()) {
+            throw new BadParametrException("при бронировании запрошена вещь со статусом Available = false. Item = "
+                    + item);
         }
         if (userService.getUserById(userId).isEmpty()) {
             throw new NotFoundParametrException("при бронировании, был указан несуществующий пользователь владелец");
         }
-
-        return bookingService.saveBooking(booking, userId);
+        Booking booking = BookingMapper.toBooking(bookingDtoCreate, item,
+                userService.getUserById(userId).get());
+        var rez = bookingService.saveBooking(booking);
+        rez.setItemId(null);
+        return rez;
     }
 
     @PatchMapping("/{bookingId}")

@@ -18,7 +18,6 @@ public class UserService {
     private UserStorage userStorage;
 
 
-
     public UserDto createUser(User user) {
 //        if (isUsersEmailDuplicate(user).size() != 0) {
 //            throw new ConflictParametrException("при создании пользователя передан Email уже существующего пользователя");
@@ -42,18 +41,14 @@ public class UserService {
         return UserMapper.toUserDto(patchingUser);
     }
 
-    public Optional<UserDto> getUserById(Long userId) {
-        Optional<User> rezQuery = userStorage.findById(userId);
-        if (rezQuery.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(UserMapper.toUserDto(rezQuery.get()));
+    public Optional<User> getUserById(Long userId) {
+        return userStorage.findById(userId);
     }
 
     public List<UserDto> getAllUsers() {
-        return userStorage.findAll().stream().
-                map(UserMapper::toUserDto).
-                collect(Collectors.toList());
+        return userStorage.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     public void deleteUserById(Long userId) {

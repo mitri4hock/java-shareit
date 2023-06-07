@@ -99,10 +99,10 @@ public class ItemService {
     public List<ItemDtoLastNextBookingAndComments> getAllMyItems(Long userId) {
         return itemStorage.findByOwner_id(userId).stream()
                 .map(o -> ItemMapper.toItemDtoLastNextBookingAndComments(o,
-                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(o.getId(), Date.from(Instant.now()))),
-                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(o.getId(), Date.from(Instant.now()))),
-                        commentStorage.findByItem_Id(o.getId()).stream().map(CommentMapper::toCommentDto).
-                                collect(Collectors.toList())
+                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(o.getId(), Instant.now())),
+                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(o.getId(), Instant.now())),
+                        commentStorage.findByItem_Id(o.getId()).stream().map(CommentMapper::toCommentDto)
+                                .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
 
@@ -128,15 +128,15 @@ public class ItemService {
         return CommentMapper.toCommentDto(commentStorage.save(comment));
     }
 
-    public Booking findLastBookingById (Long itemId){
-        return bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(itemId, Date.from(Instant.now()));
+    public Booking findLastBookingById(Long itemId) {
+        return bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(itemId, Instant.now());
     }
 
-    public Booking findNextBookingById (Long itemId){
-        return bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(itemId, Date.from(Instant.now()));
+    public Booking findNextBookingById(Long itemId) {
+        return bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(itemId, Instant.now());
     }
 
-    public List<Comment> findByItem_Id(Long itemId){
-        return  commentStorage.findByItem_Id(itemId);
+    public List<Comment> findByItem_Id(Long itemId) {
+        return commentStorage.findByItem_Id(itemId);
     }
 }

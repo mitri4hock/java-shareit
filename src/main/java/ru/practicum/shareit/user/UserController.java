@@ -44,10 +44,10 @@ public class UserController {
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable Long userId) {
         var rez = userService.getUserById(userId);
-        if (rez.isEmpty()){
+        if (rez.isEmpty()) {
             throw new NotFoundParametrException("Отсутствует запрашиваемый пользователь. userId= " + userId);
         }
-        return rez.get();
+        return UserMapper.toUserDto(rez.get());
     }
 
     @GetMapping

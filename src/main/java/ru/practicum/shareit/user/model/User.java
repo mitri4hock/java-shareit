@@ -11,7 +11,10 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "users", schema = "public")
-@Getter @Setter @ToString @EqualsAndHashCode
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 public class User {
     @Id

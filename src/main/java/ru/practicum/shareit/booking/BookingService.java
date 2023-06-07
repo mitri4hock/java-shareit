@@ -30,9 +30,7 @@ public class BookingService {
         this.itemStorage = itemStorage;
     }
 
-    public BookingDto saveBooking(Booking booking, Long userId) {
-        booking.setBooker(userStorage.findById(userId).get());
-        booking.setStatus(EnumStatusBooking.WAITING);
+    public BookingDto saveBooking(Booking booking) {
         var rez = bookingStorage.save(booking);
         return BookingMapper.toBookingDto(rez);
     }
@@ -64,13 +62,13 @@ public class BookingService {
                 break;
             case "CURRENT":
                 preRez = bookingStorage.findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
-                        Date.from(Instant.now()), Date.from(Instant.now()));
+                        Instant.now(), Instant.now());
                 break;
             case "PAST":
-                preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, Date.from(Instant.now()));
+                preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, Instant.now());
                 break;
             case "FUTURE":
-                preRez = bookingStorage.findByBooker_IdAndStartAfterOrderByStartDesc(userId, Date.from(Instant.now()));
+                preRez = bookingStorage.findByBooker_IdAndStartAfterOrderByStartDesc(userId, Instant.now());
                 break;
             case "WAITING":
                 preRez = bookingStorage.findByBooker_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
@@ -81,9 +79,9 @@ public class BookingService {
             default:
                 throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return preRez.stream().
-                map(BookingMapper::toBookingDto).
-                collect(Collectors.toList());
+        return preRez.stream()
+                .map(BookingMapper::toBookingDto)
+                .collect(Collectors.toList());
     }
 
     public long countItemForUser(Long userId) {
@@ -98,13 +96,13 @@ public class BookingService {
                 break;
             case "CURRENT":
                 preRez = bookingStorage.findByItemId_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
-                        Date.from(Instant.now()), Date.from(Instant.now()));
+                        Instant.now(), Instant.now());
                 break;
             case "PAST":
-                preRez = bookingStorage.findByItemId_IdAndEndBeforeOrderByStartDesc(userId, Date.from(Instant.now()));
+                preRez = bookingStorage.findByItemId_IdAndEndBeforeOrderByStartDesc(userId, Instant.now());
                 break;
             case "FUTURE":
-                preRez = bookingStorage.findByItemId_IdAndStartAfterOrderByStartDesc(userId, Date.from(Instant.now()));
+                preRez = bookingStorage.findByItemId_IdAndStartAfterOrderByStartDesc(userId, Instant.now());
                 break;
             case "WAITING":
                 preRez = bookingStorage.findByItemId_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
