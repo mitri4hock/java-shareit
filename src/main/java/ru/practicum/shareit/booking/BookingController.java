@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -17,19 +18,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/bookings")
+@Validated
 public class BookingController {
     private final BookingService bookingService;
     private final UserService userService;
     private final ItemService itemService;
 
+    @Autowired
     public BookingController(BookingService bookingService, UserService userService, ItemService itemService) {
         this.bookingService = bookingService;
         this.userService = userService;
         this.itemService = itemService;
     }
-
-    @Autowired
-
 
     @PostMapping
     public BookingDto createBooking(@RequestBody @Valid Booking booking,
@@ -37,7 +37,7 @@ public class BookingController {
         if (booking == null) {
             throw new BadParametrException("при бронировании не было передано тело запроса");
         }
-        if (itemService.getItem(booking.getItem().getId()).getId() == null) {
+        if (itemService.getItem(booking.getItemId().getId()).getId() == null) {
             throw new NotFoundParametrException("при бронировании, была указана несуществующая вещь");
         }
         if (userService.getUserById(userId).isEmpty()) {
@@ -45,7 +45,6 @@ public class BookingController {
         }
 
         return bookingService.saveBooking(booking, userId);
-
     }
 
     @PatchMapping("/{bookingId}")
@@ -56,7 +55,7 @@ public class BookingController {
         if (booking.isEmpty()) {
             throw new NotFoundParametrException("отсутствует бронирование с id = " + bookingId);
         }
-        if (booking.get().getItem().getOwner().getId() != userId) {
+        if (booking.get().getItemId().getOwner().getId() != userId) {
             throw new ConflictParametrException("Редактировать статус бронирования может только владелец вещи");
         }
         return bookingService.updateApproved(bookingId, approved);
@@ -69,20 +68,11 @@ public class BookingController {
         if (booking.isEmpty()) {
             throw new NotFoundParametrException("отсутствует бронирование с id = " + bookingId);
         }
-        if (booking.get().getBooker().getId() != userId || booking.get().getItem().getOwner().getId() != userId) {
+        if (booking.get().getBooker().getId() != userId || booking.get().getItemId().getOwner().getId() != userId) {
             throw new ConflictParametrException("запрашивать бронирование может или автор или владелец вещи");
         }
         return BookingMapper.toBookingDto(booking.get());
     }
-
-
-    /**
-     * Получение списка всех бронирований текущего пользователя. Эндпоинт — GET /bookings?state={state}.
-     * Параметр state необязательный и по умолчанию равен ALL (англ. «все»).
-     * Также он может принимать значения CURRENT (англ. «текущие»), **PAST** (англ. «завершённые»),
-     * FUTURE (англ. «будущие»), WAITING (англ. «ожидающие подтверждения»), REJECTED (англ. «отклонённые»).
-     * Бронирования должны возвращаться отсортированными по дате от более новых к более старым
-     */
 
     @GetMapping
     public List<BookingDto> findAllBookingWithStatus(
@@ -94,12 +84,6 @@ public class BookingController {
         return bookingService.findAllBookingWithStatus(userId, state);
     }
 
-    /**
-     * Получение списка бронирований для всех вещей текущего пользователя. Эндпоинт — GET /bookings/owner?state={state}.
-     * Этот запрос имеет смысл для владельца хотя бы одной вещи. Работа параметра state аналогична его работе в
-     * предыдущем сценарии.
-     */
-    @SuppressWarnings("checkstyle:WhitespaceAround")
     @GetMapping("/owner")
     public List<BookingDto> findAllBookingForUserWithStatus(
             @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
@@ -112,11 +96,5 @@ public class BookingController {
         }
         return bookingService.findAllBookingForUserWithStatus(userId, state);
     }
-
-    /**
-     * Осталась пара штрихов. Итак, вы добавили возможность бронировать вещи. Теперь нужно, чтобы владелец видел
-     * даты последнего и ближайшего следующего бронирования для каждой вещи, когда просматривает список (GET /items).
-     */
-
 
 }

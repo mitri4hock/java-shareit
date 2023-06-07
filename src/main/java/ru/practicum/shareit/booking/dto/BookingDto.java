@@ -20,7 +20,7 @@ public class BookingDto {
     @NotNull
     private Date end;
     @NotNull
-    private Item item;
+    private Item itemId;
     @NotNull
     private User booker;
     @NotNull

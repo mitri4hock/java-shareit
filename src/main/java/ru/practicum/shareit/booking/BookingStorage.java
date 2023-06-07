@@ -1,11 +1,11 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.EnumStatusBooking;
 
-import java.awt.print.Book;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,105 +16,28 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findById(Long id);
 
+    List<Booking> findByItemId_IdOrderByStartDesc(Long ownerId);
 
-    @Query("Select *" +
-            " from booking b left join item i on b.item_id = i.id " +
-            " where i.id = ?1 " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByItemOwner(Long ownerId);
+    List<Booking> findByItemId_IdAndStartBeforeAndEndAfterOrderByStartDesc(Long id, Date start, Date end);
 
-    @Query("Select *" +
-            " from booking b left join item i on b.item_id = i.id " +
-            " where i.id = ?1 " +
-            " and b.start_date < now() " +
-            " and b.end_date > now() " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByItemOwnerCurrent(Long ownerId);
+    List<Booking> findByItemId_IdAndEndBeforeOrderByStartDesc(Long id, Date end);
 
-    @Query("Select *" +
-            " from booking b left join item i on b.item_id = i.id " +
-            " where i.id = ?1 " +
-            " and b.end_date < now() " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByItemOwnerPast(Long bookerId);
+    List<Booking> findByItemId_IdAndStartAfterOrderByStartDesc(Long id, Date start);
 
-    @Query("Select *" +
-            " from booking b left join item i on b.item_id = i.id " +
-            " where i.id = ?1 " +
-            " and b.start_date > now() " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByItemOwnerFuture(Long bookerId);
+    List<Booking> findByItemId_IdAndStatusOrderByStartDesc(Long id, EnumStatusBooking status);
 
-    @Query("Select *" +
-            " from booking b left join item i on b.item_id = i.id " +
-            " where i.id = ?1 " +
-            " and b.status = 'WAITING' " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByItemOwnerWaiting(Long bookerId);
+    List<Booking> findByBooker_IdOrderByStartDesc(Long bookerId);
 
-    @Query("Select *" +
-            " from booking b left join item i on b.item_id = i.id " +
-            " where i.id = ?1 " +
-            " and b.status = 'REJECTED' " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByItemOwnerRejected(Long bookerId);
+    List<Booking> findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(Long id, Date start, Date end);
 
-    @Query("Select *" +
-            " from booking b " +
-            " where booker_id = ?1 " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByBooker(Long bookerId);
+    List<Booking> findByBooker_IdAndEndBeforeOrderByStartDesc(Long id, Date end);
 
-    @Query("Select *" +
-            " from booking b " +
-            " where booker_id = ?1 " +
-            " and b.start_date < now() " +
-            " and b.end_date > now() " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByBookerCurrent(Long bookerId);
+    List<Booking> findByBooker_IdAndStartAfterOrderByStartDesc(Long id, Date start);
 
-    @Query("Select *" +
-            " from booking b " +
-            " where booker_id = ?1 " +
-            " and b.end_date < now() " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByBookerPast(Long bookerId);
+    List<Booking> findByBooker_IdAndStatusOrderByStartDesc(Long id, EnumStatusBooking status);
 
-    @Query("Select *" +
-            " from booking b " +
-            " where booker_id = ?1 " +
-            " and b.start_date > now() " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByBookerFuture(Long bookerId);
+    Booking findFirstByItemId_IdAndStartAfterOrderByStartAsc(Long id, Date start);
 
-    @Query("Select * " +
-            " from booking b " +
-            " where booker_id = ?1 " +
-            " and b.status = 'WAITING' " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByBookerWaiting(Long bookerId);
-
-    @Query("Select * " +
-            " from booking b " +
-            " where booker_id = ?1 " +
-            " and b.status = 'REJECTED' " +
-            " Order by b.start_date desc ")
-    List<Booking> findAllBookingByBookerRejected(Long bookerId);
-
-    @Query("Select * " +
-            " from booking b " +
-            " where item_id = ?1 " +
-            " and b.start_date > now() " +
-            " Order by b.start_date " +
-            " limit 1 ")
-    Booking findNextBookingById(Long itemId);
-
-    @Query("Select * " +
-            " from booking b " +
-            " where item_id = ?1 " +
-            " and b.start_date > now() " +
-            " Order by b.start_date desc " +
-            " limit 1 ")
-    Booking findLastBookingById(Long itemId);
+    Booking findFirstByItemId_IdAndStartBeforeOrderByStartDesc(Long id, Date start);
 
 }

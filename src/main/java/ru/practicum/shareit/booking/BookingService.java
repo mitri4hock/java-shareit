@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -11,6 +10,8 @@ import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.item.ItemStorage;
 import ru.practicum.shareit.user.UserStorage;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ public class BookingService {
     private final ItemStorage itemStorage;
 
     @Autowired
-    public BookingService(BookingStorage bookingStorage, UserStorage userStorage , ItemStorage itemStorage) {
+    public BookingService(BookingStorage bookingStorage, UserStorage userStorage, ItemStorage itemStorage) {
         this.bookingStorage = bookingStorage;
         this.userStorage = userStorage;
         this.itemStorage = itemStorage;
@@ -59,22 +60,23 @@ public class BookingService {
         List<Booking> preRez;
         switch (state) {
             case "ALL":
-                preRez = bookingStorage.findAllBookingByBooker(userId);
+                preRez = bookingStorage.findByBooker_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                preRez = bookingStorage.findAllBookingByBookerCurrent(userId);
+                preRez = bookingStorage.findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
+                        Date.from(Instant.now()), Date.from(Instant.now()));
                 break;
             case "PAST":
-                preRez = bookingStorage.findAllBookingByBookerPast(userId);
+                preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, Date.from(Instant.now()));
                 break;
             case "FUTURE":
-                preRez = bookingStorage.findAllBookingByBookerFuture(userId);
+                preRez = bookingStorage.findByBooker_IdAndStartAfterOrderByStartDesc(userId, Date.from(Instant.now()));
                 break;
             case "WAITING":
-                preRez = bookingStorage.findAllBookingByBookerWaiting(userId);
+                preRez = bookingStorage.findByBooker_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
                 break;
             case "REJECTED":
-                preRez = bookingStorage.findAllBookingByBookerRejected(userId);
+                preRez = bookingStorage.findByBooker_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.REJECTED);
                 break;
             default:
                 throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
@@ -92,22 +94,23 @@ public class BookingService {
         List<Booking> preRez;
         switch (state) {
             case "ALL":
-                preRez = bookingStorage.findAllBookingByItemOwner(userId);
+                preRez = bookingStorage.findByItemId_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                preRez = bookingStorage.findAllBookingByItemOwnerCurrent(userId);
+                preRez = bookingStorage.findByItemId_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
+                        Date.from(Instant.now()), Date.from(Instant.now()));
                 break;
             case "PAST":
-                preRez = bookingStorage.findAllBookingByItemOwnerPast(userId);
+                preRez = bookingStorage.findByItemId_IdAndEndBeforeOrderByStartDesc(userId, Date.from(Instant.now()));
                 break;
             case "FUTURE":
-                preRez = bookingStorage.findAllBookingByItemOwnerFuture(userId);
+                preRez = bookingStorage.findByItemId_IdAndStartAfterOrderByStartDesc(userId, Date.from(Instant.now()));
                 break;
             case "WAITING":
-                preRez = bookingStorage.findAllBookingByItemOwnerWaiting(userId);
+                preRez = bookingStorage.findByItemId_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
                 break;
             case "REJECTED":
-                preRez = bookingStorage.findAllBookingByItemOwnerRejected(userId);
+                preRez = bookingStorage.findByItemId_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.REJECTED);
                 break;
             default:
                 throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");

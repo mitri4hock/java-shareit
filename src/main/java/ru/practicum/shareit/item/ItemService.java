@@ -5,17 +5,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingStorage;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoLastNextBooking;
+import ru.practicum.shareit.item.dto.ItemDtoLastNextBookingAndComments;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserStorage;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,20 +31,23 @@ public class ItemService {
     private ItemStorage itemStorage;
     private UserStorage userStorage;
     private BookingStorage bookingStorage;
+    private CommentStorage commentStorage;
 
     @Autowired
-    public ItemService(ItemStorage itemStorage, UserStorage userStorage, BookingStorage bookingStorage) {
+    public ItemService(ItemStorage itemStorage, UserStorage userStorage, BookingStorage bookingStorage,
+                       CommentStorage commentStorage) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
         this.bookingStorage = bookingStorage;
+        this.commentStorage = commentStorage;
     }
 
-    public Optional<UserDto> getUserById(Long userId) {
+    public Optional<User> getUserById(Long userId) {
         Optional<User> rezQuery = userStorage.findById(userId);
         if (rezQuery.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(UserMapper.toUserDto(rezQuery.get()));
+        return Optional.of(rezQuery.get());
     }
 
     public ItemDto createItem(Item item, Long userId) {
@@ -81,20 +87,23 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage.save(tempItem.get()));
     }
 
-    public ItemDto getItem(Long itemId) {
+    public Item getItem(Long itemId) {
         Optional<Item> tempItem = itemStorage.findById(itemId);
         if (tempItem.isEmpty()) {
             log.info("Попытка запросить отсутствующую вещь. itemId= {}", itemId);
             throw new NotFoundParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
         }
-        return ItemMapper.toItemDto(tempItem.get());
+        return tempItem.get();
     }
 
-    public List<ItemDtoLastNextBooking> getAllMyItems(Long userId) {
+    public List<ItemDtoLastNextBookingAndComments> getAllMyItems(Long userId) {
         return itemStorage.findByOwner_id(userId).stream()
-                .map(o -> ItemMapper.toItemDtoLastNextBooking(o,
-                        BookingMapper.toBookingDto(bookingStorage.findLastBookingById(o.getId())),
-                        BookingMapper.toBookingDto(bookingStorage.findLastBookingById(o.getId()))))
+                .map(o -> ItemMapper.toItemDtoLastNextBookingAndComments(o,
+                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(o.getId(), Date.from(Instant.now()))),
+                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(o.getId(), Date.from(Instant.now()))),
+                        commentStorage.findByItem_Id(o.getId()).stream().map(CommentMapper::toCommentDto).
+                                collect(Collectors.toList())
+                ))
                 .collect(Collectors.toList());
 
     }
@@ -113,5 +122,21 @@ public class ItemService {
 
     public void deleteItem(Long itemId) {
         itemStorage.deleteById(itemId);
+    }
+
+    public CommentDto createComment(Comment comment) {
+        return CommentMapper.toCommentDto(commentStorage.save(comment));
+    }
+
+    public Booking findLastBookingById (Long itemId){
+        return bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(itemId, Date.from(Instant.now()));
+    }
+
+    public Booking findNextBookingById (Long itemId){
+        return bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(itemId, Date.from(Instant.now()));
+    }
+
+    public List<Comment> findByItem_Id(Long itemId){
+        return  commentStorage.findByItem_Id(itemId);
     }
 }
