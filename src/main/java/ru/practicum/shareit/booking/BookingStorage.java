@@ -6,7 +6,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.EnumStatusBooking;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,15 +16,15 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findById(Long id);
 
-    List<Booking> findByItemId_IdOrderByStartDesc(Long ownerId);
+    List<Booking> findByItem_Owner_IdOrderByStartDesc(Long ownerId);
 
-    List<Booking> findByItemId_IdAndStartBeforeAndEndAfterOrderByStartDesc(Long id, Instant start, Instant end);
+    List<Booking> findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(Long id, Instant start, Instant end);
 
-    List<Booking> findByItemId_IdAndEndBeforeOrderByStartDesc(Long id, Instant end);
+    List<Booking> findByItem_Owner_IdAndEndBeforeOrderByStartDesc(Long id, Instant end);
 
-    List<Booking> findByItemId_IdAndStartAfterOrderByStartDesc(Long id, Instant start);
+    List<Booking> findByItem_Owner_IdAndStartAfterOrderByStartDesc(Long id, Instant start);
 
-    List<Booking> findByItemId_IdAndStatusOrderByStartDesc(Long id, EnumStatusBooking status);
+    List<Booking> findByItem_Owner_IdAndStatusOrderByStartDesc(Long id, EnumStatusBooking status);
 
     List<Booking> findByBooker_IdOrderByStartDesc(Long bookerId);
 
@@ -37,8 +36,8 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     List<Booking> findByBooker_IdAndStatusOrderByStartDesc(Long id, EnumStatusBooking status);
 
-    Booking findFirstByItemId_IdAndStartAfterOrderByStartAsc(Long id, Instant start);
+    Booking findFirstByItem_IdAndStartAfterOrderByStartAsc(Long id, Instant start);
 
-    Booking findFirstByItemId_IdAndStartBeforeOrderByStartDesc(Long id, Instant start);
+    Booking findFirstByItem_IdAndStartBeforeOrderByStartDesc(Long id, Instant start);
 
 }

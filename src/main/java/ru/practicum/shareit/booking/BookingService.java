@@ -11,7 +11,6 @@ import ru.practicum.shareit.item.ItemStorage;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,6 +46,9 @@ public class BookingService {
     public BookingDto updateApproved(Long bookingId, Boolean approved) {
         var rez = bookingStorage.findById(bookingId);
         if (approved == true) {
+            if (rez.get().getStatus() == EnumStatusBooking.APPROVED){
+                throw new BadParametrException("статус бронирование уже установлен на APPROVED");
+            }
             rez.get().setStatus(EnumStatusBooking.APPROVED);
         } else {
             rez.get().setStatus(EnumStatusBooking.REJECTED);
@@ -92,23 +94,23 @@ public class BookingService {
         List<Booking> preRez;
         switch (state) {
             case "ALL":
-                preRez = bookingStorage.findByItemId_IdOrderByStartDesc(userId);
+                preRez = bookingStorage.findByItem_Owner_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                preRez = bookingStorage.findByItemId_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
+                preRez = bookingStorage.findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
                         Instant.now(), Instant.now());
                 break;
             case "PAST":
-                preRez = bookingStorage.findByItemId_IdAndEndBeforeOrderByStartDesc(userId, Instant.now());
+                preRez = bookingStorage.findByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, Instant.now());
                 break;
             case "FUTURE":
-                preRez = bookingStorage.findByItemId_IdAndStartAfterOrderByStartDesc(userId, Instant.now());
+                preRez = bookingStorage.findByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, Instant.now());
                 break;
             case "WAITING":
-                preRez = bookingStorage.findByItemId_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
+                preRez = bookingStorage.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
                 break;
             case "REJECTED":
-                preRez = bookingStorage.findByItemId_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.REJECTED);
+                preRez = bookingStorage.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.REJECTED);
                 break;
             default:
                 throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");

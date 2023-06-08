@@ -9,15 +9,16 @@ import ru.practicum.shareit.user.model.User;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
 @Builder
 public class BookingDto {
     private Long id;
-    private Instant start;
-    private Instant end;
-    private Item itemId;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private Item item;
     private User booker;
     private EnumStatusBooking status;
 }

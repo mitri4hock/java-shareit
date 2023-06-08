@@ -7,6 +7,9 @@ import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 public class BookingMapper {
     public static BookingDto toBookingDto(Booking booking) {
         if (booking == null) {
@@ -14,9 +17,9 @@ public class BookingMapper {
         }
         return BookingDto.builder()
                 .id(booking.getId())
-                .end(booking.getEnd())
-                .start(booking.getStart())
-                .itemId(booking.getItemId())
+                .end(LocalDateTime.ofInstant( booking.getEnd() , ZoneId.of("UTC")))
+                .start(LocalDateTime.ofInstant(booking.getStart(), ZoneId.of("UTC")))
+                .item(booking.getItem())
                 .booker(booking.getBooker())
                 .status(booking.getStatus())
                 .build();
@@ -26,7 +29,7 @@ public class BookingMapper {
         Booking booking = new Booking();
         booking.setStart(bookingDtoForCreate.getStart().toInstant());
         booking.setEnd(bookingDtoForCreate.getEnd().toInstant());
-        booking.setItemId(item);
+        booking.setItem(item);
         booking.setBooker(booker);
         booking.setStatus(EnumStatusBooking.WAITING);
         return booking;

@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoForCreate;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
@@ -17,6 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -35,10 +35,17 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingDto createBooking(@RequestBody BookingDtoForCreate bookingDtoCreate,
+    public BookingDto createBooking(@RequestBody @Valid BookingDtoForCreate bookingDtoCreate,
                                     @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
         if (bookingDtoCreate == null) {
             throw new BadParametrException("при бронировании не было передано тело запроса");
+        }
+        if (bookingDtoCreate.getStart().before(Date.from(Instant.now())) ||
+                bookingDtoCreate.getEnd().before(bookingDtoCreate.getStart()) ||
+                bookingDtoCreate.getEnd().equals(bookingDtoCreate.getStart())) {
+            throw new BadParametrException("Неверный формат даты старта и окончания бронирования: Start Date: "
+                    + bookingDtoCreate.getStart() + " End Date: " + bookingDtoCreate.getEnd() + " Now: "
+                    + Date.from(Instant.now()));
         }
         var item = itemService.getItem(bookingDtoCreate.getItemId());
         if (item == null) {
@@ -51,11 +58,12 @@ public class BookingController {
         if (userService.getUserById(userId).isEmpty()) {
             throw new NotFoundParametrException("при бронировании, был указан несуществующий пользователь владелец");
         }
+        if (userId == item.getOwner().getId()) {
+            throw new NotFoundParametrException("пользователь не может забронировать свою вещь");
+        }
         Booking booking = BookingMapper.toBooking(bookingDtoCreate, item,
                 userService.getUserById(userId).get());
-        var rez = bookingService.saveBooking(booking);
-        rez.setItemId(null);
-        return rez;
+        return bookingService.saveBooking(booking);
     }
 
     @PatchMapping("/{bookingId}")
@@ -66,10 +74,11 @@ public class BookingController {
         if (booking.isEmpty()) {
             throw new NotFoundParametrException("отсутствует бронирование с id = " + bookingId);
         }
-        if (booking.get().getItemId().getOwner().getId() != userId) {
-            throw new ConflictParametrException("Редактировать статус бронирования может только владелец вещи");
+        if (booking.get().getItem().getOwner().getId() != userId) {
+            throw new NotFoundParametrException("Редактировать статус бронирования может только владелец вещи");
         }
-        return bookingService.updateApproved(bookingId, approved);
+        var a = bookingService.updateApproved(bookingId, approved);
+        return a;
     }
 
     @GetMapping("/{bookingId}")
@@ -79,10 +88,11 @@ public class BookingController {
         if (booking.isEmpty()) {
             throw new NotFoundParametrException("отсутствует бронирование с id = " + bookingId);
         }
-        if (booking.get().getBooker().getId() != userId || booking.get().getItemId().getOwner().getId() != userId) {
-            throw new ConflictParametrException("запрашивать бронирование может или автор или владелец вещи");
+        if (booking.get().getBooker().getId() == userId || booking.get().getItem().getOwner().getId() == userId) {
+            return BookingMapper.toBookingDto(booking.get());
+        } else {
+            throw new NotFoundParametrException("запрашивать бронирование может или автор или владелец вещи");
         }
-        return BookingMapper.toBookingDto(booking.get());
     }
 
     @GetMapping
@@ -90,7 +100,7 @@ public class BookingController {
             @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
             @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
         if (userService.getUserById(userId).isEmpty()) {
-            throw new BadParametrException("Запрошены бронирования от несуществующего пользователя. Id = " + userId);
+            throw new NotFoundParametrException("Запрошены бронирования от несуществующего пользователя. Id = " + userId);
         }
         return bookingService.findAllBookingWithStatus(userId, state);
     }
@@ -100,7 +110,7 @@ public class BookingController {
             @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
             @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
         if (userService.getUserById(userId).isEmpty()) {
-            throw new BadParametrException("Запрошены бронирования от несуществующего пользователя. Id = " + userId);
+            throw new NotFoundParametrException("Запрошены бронирования от несуществующего пользователя. Id = " + userId);
         }
         if (bookingService.countItemForUser(userId) == 0L) {
             return new ArrayList<>();

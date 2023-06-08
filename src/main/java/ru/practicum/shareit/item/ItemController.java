@@ -61,9 +61,9 @@ public class ItemController {
         if (user == null) {
             throw new NotFoundParametrException("при создании комментария, была указана несуществующая вещь");
         }
-        var booking = bookingService.findAllBookingForUserWithStatus(userId, "PAST");
+        var booking = bookingService.findAllBookingWithStatus(userId, "PAST");
         if (booking.size() < 1) {
-            throw new ConflictParametrException("Пользователь не брал в аренду вещь. UserId = " + userId +
+            throw new BadParametrException("Пользователь не брал в аренду вещь. UserId = " + userId +
                     " ItemId = " + itemId);
         }
         comment.setItem(item);

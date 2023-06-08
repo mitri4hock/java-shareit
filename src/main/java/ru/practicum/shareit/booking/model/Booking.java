@@ -1,14 +1,12 @@
 package ru.practicum.shareit.booking.model;
 
 import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
-import java.util.Date;
 
 @Entity
 @Table(name = "booking", schema = "public")
@@ -28,10 +26,10 @@ public class Booking {
     @Column(name = "end_date", nullable = false)
     private Instant end;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "item_id", nullable = false)
-    private Item itemId;
-    @ManyToOne(fetch = FetchType.LAZY)
+    private Item item;
+    @ManyToOne()
     @JoinColumn(name = "booker_id", nullable = false)
     private User booker;
     @Enumerated(EnumType.STRING)

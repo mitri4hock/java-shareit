@@ -18,7 +18,6 @@ import ru.practicum.shareit.user.UserStorage;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -99,8 +98,8 @@ public class ItemService {
     public List<ItemDtoLastNextBookingAndComments> getAllMyItems(Long userId) {
         return itemStorage.findByOwner_id(userId).stream()
                 .map(o -> ItemMapper.toItemDtoLastNextBookingAndComments(o,
-                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(o.getId(), Instant.now())),
-                        BookingMapper.toBookingDto(bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(o.getId(), Instant.now())),
+                        BookingMapper.toBookingDto(bookingStorage.findFirstByItem_IdAndStartBeforeOrderByStartDesc(o.getId(), Instant.now())),
+                        BookingMapper.toBookingDto(bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartAsc(o.getId(), Instant.now())),
                         commentStorage.findByItem_Id(o.getId()).stream().map(CommentMapper::toCommentDto)
                                 .collect(Collectors.toList())
                 ))
@@ -129,11 +128,11 @@ public class ItemService {
     }
 
     public Booking findLastBookingById(Long itemId) {
-        return bookingStorage.findFirstByItemId_IdAndStartBeforeOrderByStartDesc(itemId, Instant.now());
+        return bookingStorage.findFirstByItem_IdAndStartBeforeOrderByStartDesc(itemId, Instant.now());
     }
 
     public Booking findNextBookingById(Long itemId) {
-        return bookingStorage.findFirstByItemId_IdAndStartAfterOrderByStartAsc(itemId, Instant.now());
+        return bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartAsc(itemId, Instant.now());
     }
 
     public List<Comment> findByItem_Id(Long itemId) {
