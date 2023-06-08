@@ -38,6 +38,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     Booking findFirstByItem_IdAndStartAfterOrderByStartAsc(Long id, Instant start);
 
-    Booking findFirstByItem_IdAndStartBeforeOrderByStartDesc(Long id, Instant start);
+    Booking findFirstByItem_IdAndStartAfterOrderByStartDesc(Long id, Instant start);
+
 
 }

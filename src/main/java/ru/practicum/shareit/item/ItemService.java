@@ -98,7 +98,7 @@ public class ItemService {
     public List<ItemDtoLastNextBookingAndComments> getAllMyItems(Long userId) {
         return itemStorage.findByOwner_id(userId).stream()
                 .map(o -> ItemMapper.toItemDtoLastNextBookingAndComments(o,
-                        BookingMapper.toBookingDto(bookingStorage.findFirstByItem_IdAndStartBeforeOrderByStartDesc(o.getId(), Instant.now())),
+                        BookingMapper.toBookingDto(bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartDesc(o.getId(), Instant.now())),
                         BookingMapper.toBookingDto(bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartAsc(o.getId(), Instant.now())),
                         commentStorage.findByItem_Id(o.getId()).stream().map(CommentMapper::toCommentDto)
                                 .collect(Collectors.toList())
@@ -128,7 +128,7 @@ public class ItemService {
     }
 
     public Booking findLastBookingById(Long itemId) {
-        return bookingStorage.findFirstByItem_IdAndStartBeforeOrderByStartDesc(itemId, Instant.now());
+        return bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartDesc(itemId, Instant.now());
     }
 
     public Booking findNextBookingById(Long itemId) {
