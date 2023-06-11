@@ -4,8 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.EnumStatusBooking;
-
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,27 +17,28 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     List<Booking> findByItem_Owner_IdOrderByStartDesc(Long ownerId);
 
-    List<Booking> findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(Long id, Instant start, Instant end);
+    List<Booking> findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(Long id, LocalDateTime start, LocalDateTime end);
 
-    List<Booking> findByItem_Owner_IdAndEndBeforeOrderByStartDesc(Long id, Instant end);
+    List<Booking> findByItem_Owner_IdAndEndBeforeOrderByStartDesc(Long id, LocalDateTime end);
 
-    List<Booking> findByItem_Owner_IdAndStartAfterOrderByStartDesc(Long id, Instant start);
+    List<Booking> findByItem_Owner_IdAndStartAfterOrderByStartDesc(Long id, LocalDateTime start);
 
     List<Booking> findByItem_Owner_IdAndStatusOrderByStartDesc(Long id, EnumStatusBooking status);
 
     List<Booking> findByBooker_IdOrderByStartDesc(Long bookerId);
 
-    List<Booking> findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(Long id, Instant start, Instant end);
+    List<Booking> findByBooker_IdAndStartBeforeAndEndAfterOrderByIdAsc(Long id, LocalDateTime start, LocalDateTime end);
 
-    List<Booking> findByBooker_IdAndEndBeforeOrderByStartDesc(Long id, Instant end);
+    List<Booking> findByBooker_IdAndEndBeforeOrderByStartDesc(Long id, LocalDateTime end);
 
-    List<Booking> findByBooker_IdAndStartAfterOrderByStartDesc(Long id, Instant start);
+    List<Booking> findByBooker_IdAndStartAfterOrderByStartDesc(Long id, LocalDateTime start);
 
     List<Booking> findByBooker_IdAndStatusOrderByStartDesc(Long id, EnumStatusBooking status);
 
-    Booking findFirstByItem_IdAndStartAfterOrderByStartAsc(Long id, Instant start);
+    Booking findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(Long id, LocalDateTime start, EnumStatusBooking status);
 
-    Booking findFirstByItem_IdAndStartAfterOrderByStartDesc(Long id, Instant start);
+    Booking findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(Long id, LocalDateTime start, EnumStatusBooking status);
+
 
 
 }

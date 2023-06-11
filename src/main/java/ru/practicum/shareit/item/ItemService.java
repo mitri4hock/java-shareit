@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -16,7 +17,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserStorage;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -96,10 +97,10 @@ public class ItemService {
     }
 
     public List<ItemDtoLastNextBookingAndComments> getAllMyItems(Long userId) {
-        return itemStorage.findByOwner_id(userId).stream()
+        return itemStorage.findByOwner_idOrderByIdAsc(userId).stream()
                 .map(o -> ItemMapper.toItemDtoLastNextBookingAndComments(o,
-                        BookingMapper.toBookingDto(bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartDesc(o.getId(), Instant.now())),
-                        BookingMapper.toBookingDto(bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartAsc(o.getId(), Instant.now())),
+                        BookingMapper.toBookingDtoSmallBooker(bookingStorage.findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(o.getId(), LocalDateTime.now(), EnumStatusBooking.APPROVED)),
+                        BookingMapper.toBookingDtoSmallBooker(bookingStorage.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(o.getId(), LocalDateTime.now(), EnumStatusBooking.APPROVED)),
                         commentStorage.findByItem_Id(o.getId()).stream().map(CommentMapper::toCommentDto)
                                 .collect(Collectors.toList())
                 ))
@@ -124,15 +125,16 @@ public class ItemService {
     }
 
     public CommentDto createComment(Comment comment) {
+        comment.setCreated(LocalDateTime.now());
         return CommentMapper.toCommentDto(commentStorage.save(comment));
     }
 
     public Booking findLastBookingById(Long itemId) {
-        return bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartDesc(itemId, Instant.now());
+        return bookingStorage.findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(itemId, LocalDateTime.now(), EnumStatusBooking.APPROVED);
     }
 
     public Booking findNextBookingById(Long itemId) {
-        return bookingStorage.findFirstByItem_IdAndStartAfterOrderByStartAsc(itemId, Instant.now());
+        return bookingStorage.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(), EnumStatusBooking.APPROVED);
     }
 
     public List<Comment> findByItem_Id(Long itemId) {

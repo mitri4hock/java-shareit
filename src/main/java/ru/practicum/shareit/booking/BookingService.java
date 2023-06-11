@@ -9,8 +9,7 @@ import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.item.ItemStorage;
 import ru.practicum.shareit.user.UserStorage;
-
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,7 +45,7 @@ public class BookingService {
     public BookingDto updateApproved(Long bookingId, Boolean approved) {
         var rez = bookingStorage.findById(bookingId);
         if (approved == true) {
-            if (rez.get().getStatus() == EnumStatusBooking.APPROVED){
+            if (rez.get().getStatus() == EnumStatusBooking.APPROVED) {
                 throw new BadParametrException("статус бронирование уже установлен на APPROVED");
             }
             rez.get().setStatus(EnumStatusBooking.APPROVED);
@@ -63,14 +62,14 @@ public class BookingService {
                 preRez = bookingStorage.findByBooker_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                preRez = bookingStorage.findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
-                        Instant.now(), Instant.now());
+                preRez = bookingStorage.findByBooker_IdAndStartBeforeAndEndAfterOrderByIdAsc(userId,
+                        LocalDateTime.now(), LocalDateTime.now());
                 break;
             case "PAST":
-                preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, Instant.now());
+                preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
                 break;
             case "FUTURE":
-                preRez = bookingStorage.findByBooker_IdAndStartAfterOrderByStartDesc(userId, Instant.now());
+                preRez = bookingStorage.findByBooker_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
                 break;
             case "WAITING":
                 preRez = bookingStorage.findByBooker_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
@@ -98,13 +97,13 @@ public class BookingService {
                 break;
             case "CURRENT":
                 preRez = bookingStorage.findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
-                        Instant.now(), Instant.now());
+                        LocalDateTime.now(), LocalDateTime.now());
                 break;
             case "PAST":
-                preRez = bookingStorage.findByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, Instant.now());
+                preRez = bookingStorage.findByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
                 break;
             case "FUTURE":
-                preRez = bookingStorage.findByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, Instant.now());
+                preRez = bookingStorage.findByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
                 break;
             case "WAITING":
                 preRez = bookingStorage.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
@@ -115,8 +114,8 @@ public class BookingService {
             default:
                 throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return preRez.stream().
-                map(BookingMapper::toBookingDto).
-                collect(Collectors.toList());
+        return preRez.stream()
+                .map(BookingMapper::toBookingDto)
+                .collect(Collectors.toList());
     }
 }

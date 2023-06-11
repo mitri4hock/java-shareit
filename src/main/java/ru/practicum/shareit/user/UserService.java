@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -19,9 +18,6 @@ public class UserService {
 
 
     public UserDto createUser(User user) {
-//        if (isUsersEmailDuplicate(user).size() != 0) {
-//            throw new ConflictParametrException("при создании пользователя передан Email уже существующего пользователя");
-//        }
         return UserMapper.toUserDto(userStorage.save(user));
     }
 
@@ -58,6 +54,5 @@ public class UserService {
     private List<User> isUsersEmailDuplicate(User user) {
         return userStorage.findByEmailContainingIgnoreCase(user.getEmail());
     }
-
 
 }

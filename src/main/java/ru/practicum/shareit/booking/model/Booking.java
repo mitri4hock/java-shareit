@@ -6,7 +6,7 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "booking", schema = "public")
@@ -21,10 +21,10 @@ public class Booking {
     private Long id;
     @NotNull
     @Column(name = "start_date", nullable = false)
-    private Instant start;
+    private LocalDateTime  start;
     @NotNull
     @Column(name = "end_date", nullable = false)
-    private Instant end;
+    private LocalDateTime end;
 
     @ManyToOne()
     @JoinColumn(name = "item_id", nullable = false)

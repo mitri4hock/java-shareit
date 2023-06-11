@@ -5,8 +5,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.dto.BookingDtoSmallBooker;
 import ru.practicum.shareit.exceptions.BadParametrException;
-import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -81,10 +81,15 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoLastNextBookingAndComments getItem(@PathVariable Long itemId) {
+    public ItemDtoLastNextBookingAndComments getItem(@PathVariable Long itemId,
+                                                     @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
         var item = itemService.getItem(itemId);
-        var lastBooking = BookingMapper.toBookingDto(itemService.findLastBookingById(item.getId()));
-        var nextBooking = BookingMapper.toBookingDto(itemService.findNextBookingById(item.getId()));
+        BookingDtoSmallBooker lastBooking = null;
+        BookingDtoSmallBooker nextBooking = null;
+        if (item.getOwner().getId() == userId) {
+            lastBooking = BookingMapper.toBookingDtoSmallBooker(itemService.findLastBookingById(item.getId()));
+            nextBooking = BookingMapper.toBookingDtoSmallBooker(itemService.findNextBookingById(item.getId()));
+        }
         var comments = itemService.findByItem_Id(item.getId()).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());

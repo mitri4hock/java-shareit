@@ -13,9 +13,8 @@ import ru.practicum.shareit.user.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -39,12 +38,12 @@ public class BookingController {
         if (bookingDtoCreate == null) {
             throw new BadParametrException("при бронировании не было передано тело запроса");
         }
-        if (bookingDtoCreate.getStart().before(Date.from(Instant.now())) ||
-                bookingDtoCreate.getEnd().before(bookingDtoCreate.getStart()) ||
+        if (bookingDtoCreate.getStart().isBefore(LocalDateTime.now()) ||
+                bookingDtoCreate.getEnd().isBefore(bookingDtoCreate.getStart()) ||
                 bookingDtoCreate.getEnd().equals(bookingDtoCreate.getStart())) {
             throw new BadParametrException("Неверный формат даты старта и окончания бронирования: Start Date: "
                     + bookingDtoCreate.getStart() + " End Date: " + bookingDtoCreate.getEnd() + " Now: "
-                    + Date.from(Instant.now()));
+                    + LocalDateTime.now());
         }
         var item = itemService.getItem(bookingDtoCreate.getItemId());
         if (item == null) {

@@ -12,7 +12,6 @@ import ru.practicum.shareit.user.model.User;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/users")

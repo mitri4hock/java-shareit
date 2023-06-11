@@ -3,14 +3,14 @@ package ru.practicum.shareit.booking.dto;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public class BookingDtoForCreate {
     @NotNull
     private Long itemId;
     @NotNull
-    private Date start;
+    private LocalDateTime start;
     @NotNull
-    private Date end;
+    private LocalDateTime end;
 }
