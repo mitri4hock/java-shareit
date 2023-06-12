@@ -56,7 +56,8 @@ public class BookingController {
         if (userService.getUserById(userId).isEmpty()) {
             throw new NotFoundParametrException("при бронировании, был указан несуществующий пользователь владелец");
         }
-        if (userId == item.getOwner().getId()) {
+        var ownerId = item.getOwner().getId();
+        if (userId.equals(ownerId)) {
             throw new NotFoundParametrException("пользователь не может забронировать свою вещь");
         }
         Booking booking = BookingMapper.toBooking(bookingDtoCreate, item,
@@ -72,11 +73,10 @@ public class BookingController {
         if (booking.isEmpty()) {
             throw new NotFoundParametrException("отсутствует бронирование с id = " + bookingId);
         }
-        if (booking.get().getItem().getOwner().getId() != userId) {
+        if (!booking.get().getItem().getOwner().getId().equals(userId)) {
             throw new NotFoundParametrException("Редактировать статус бронирования может только владелец вещи");
         }
-        var a = bookingService.updateApproved(bookingId, approved);
-        return a;
+        return bookingService.updateApproved(bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
@@ -86,7 +86,7 @@ public class BookingController {
         if (booking.isEmpty()) {
             throw new NotFoundParametrException("отсутствует бронирование с id = " + bookingId);
         }
-        if (booking.get().getBooker().getId() == userId || booking.get().getItem().getOwner().getId() == userId) {
+        if (booking.get().getBooker().getId().equals(userId) || booking.get().getItem().getOwner().getId().equals(userId)) {
             return BookingMapper.toBookingDto(booking.get());
         } else {
             throw new NotFoundParametrException("запрашивать бронирование может или автор или владелец вещи");

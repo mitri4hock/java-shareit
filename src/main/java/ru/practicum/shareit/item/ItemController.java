@@ -86,7 +86,7 @@ public class ItemController {
         var item = itemService.getItem(itemId);
         BookingDtoSmallBooker lastBooking = null;
         BookingDtoSmallBooker nextBooking = null;
-        if (item.getOwner().getId() == userId) {
+        if (item.getOwner().getId().equals(userId)) {
             lastBooking = BookingMapper.toBookingDtoSmallBooker(itemService.findLastBookingById(item.getId()));
             nextBooking = BookingMapper.toBookingDtoSmallBooker(itemService.findNextBookingById(item.getId()));
         }
