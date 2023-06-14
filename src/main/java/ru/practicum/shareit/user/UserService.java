@@ -3,6 +3,8 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.BadParametrException;
+import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -37,8 +39,12 @@ public class UserService {
         return UserMapper.toUserDto(patchingUser);
     }
 
-    public Optional<User> getUserById(Long userId) {
-        return userStorage.findById(userId);
+    public UserDto getUserById(Long userId) {
+        var rez= userStorage.findById(userId);
+        if (rez.isEmpty()) {
+            throw new NotFoundParametrException("Отсутствует запрашиваемый пользователь. userId= " + userId);
+        }
+        return UserMapper.toUserDto(rez.get());
     }
 
     public List<UserDto> getAllUsers() {

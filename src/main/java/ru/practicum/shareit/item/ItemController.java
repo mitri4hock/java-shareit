@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -23,28 +25,16 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/items")
 @Validated
+@AllArgsConstructor
 public class ItemController {
 
     private final ItemService itemService;
     private final BookingService bookingService;
 
-    @Autowired
-    ItemController(ItemService itemService,
-                   BookingService bookingService) {
-        this.itemService = itemService;
-        this.bookingService = bookingService;
-    }
-
     @PostMapping
-    public ItemDto createItem(@RequestBody @Valid Item item,
+    @ResponseStatus(HttpStatus.CREATED)
+    public ItemDto createItem(@RequestBody @Valid @NotNull Item item,
                               @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-
-        if (item == null) {
-            throw new BadParametrException("при создании вещи не было передано тело запроса");
-        }
-        if (itemService.getUserById(userId).isEmpty()) {
-            throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
-        }
 
         return itemService.createItem(item, userId);
     }
@@ -52,23 +42,8 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestBody @Valid Comment comment, @PathVariable @NotNull Long itemId,
                                     @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-        var user = itemService.getUserById(userId);
-        if (user.isEmpty()) {
-            throw new NotFoundParametrException("при создании комментария, был указан несуществующий " +
-                    "пользователь комментатор");
-        }
-        var item = itemService.getItem(itemId);
-        if (user == null) {
-            throw new NotFoundParametrException("при создании комментария, была указана несуществующая вещь");
-        }
-        var booking = bookingService.findAllBookingWithStatus(userId, "PAST");
-        if (booking.size() < 1) {
-            throw new BadParametrException("Пользователь не брал в аренду вещь. UserId = " + userId +
-                    " ItemId = " + itemId);
-        }
-        comment.setItem(item);
-        comment.setAuthor(user.get());
-        return itemService.createComment(comment);
+
+        return itemService.createComment(comment, itemId, userId);
 
     }
 
@@ -83,17 +58,8 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDtoLastNextBookingAndComments getItem(@PathVariable Long itemId,
                                                      @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-        var item = itemService.getItem(itemId);
-        BookingDtoSmallBooker lastBooking = null;
-        BookingDtoSmallBooker nextBooking = null;
-        if (item.getOwner().getId().equals(userId)) {
-            lastBooking = BookingMapper.toBookingDtoSmallBooker(itemService.findLastBookingById(item.getId()));
-            nextBooking = BookingMapper.toBookingDtoSmallBooker(itemService.findNextBookingById(item.getId()));
-        }
-        var comments = itemService.findByItem_Id(item.getId()).stream()
-                .map(CommentMapper::toCommentDto)
-                .collect(Collectors.toList());
-        return ItemMapper.toItemDtoLastNextBookingAndComments(item, lastBooking, nextBooking, comments);
+
+        return itemService.getItemLastNextBookingAndComments(itemId, userId);
     }
 
     @GetMapping
@@ -101,7 +67,7 @@ public class ItemController {
         return itemService.getAllMyItems(userId);
     }
 
-    @GetMapping("/search") //search?text={text}
+    @GetMapping("/search")
     public List<ItemDto> findItem(@RequestParam(value = "text") String text) {
         return itemService.findItem(text);
     }

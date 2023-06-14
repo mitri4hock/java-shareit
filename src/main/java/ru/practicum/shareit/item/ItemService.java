@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.BookingStorage;
+import ru.practicum.shareit.booking.dto.BookingDtoSmallBooker;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.exceptions.BadParametrException;
@@ -51,6 +53,9 @@ public class ItemService {
     }
 
     public ItemDto createItem(Item item, Long userId) {
+        if (getUserById(userId).isEmpty()) {
+            throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
+        }
         Item result = item;
         result.setOwner(userStorage.findById(userId).get());
         return ItemMapper.toItemDto(itemStorage.save(result));
@@ -124,7 +129,26 @@ public class ItemService {
         itemStorage.deleteById(itemId);
     }
 
-    public CommentDto createComment(Comment comment) {
+    public CommentDto createComment(Comment comment, Long itemId, Long userId) {
+        var user = getUserById(userId);
+        if (user.isEmpty()) {
+            throw new NotFoundParametrException("при создании комментария, был указан несуществующий " +
+                    "пользователь комментатор");
+        }
+        var item = getItem(itemId);
+        if (item == null) {
+            throw new NotFoundParametrException("при создании комментария, была указана несуществующая вещь");
+        }
+        var preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+        var booking = preRez.stream()
+                .map(BookingMapper::toBookingDto)
+                .collect(Collectors.toList());
+        if (booking.size() < 1) {
+            throw new BadParametrException("Пользователь не брал в аренду вещь. UserId = " + userId +
+                    " ItemId = " + itemId);
+        }
+        comment.setItem(item);
+        comment.setAuthor(user.get());
         comment.setCreated(LocalDateTime.now());
         return CommentMapper.toCommentDto(commentStorage.save(comment));
     }
@@ -139,5 +163,19 @@ public class ItemService {
 
     public List<Comment> findByItem_Id(Long itemId) {
         return commentStorage.findByItem_Id(itemId);
+    }
+
+    public ItemDtoLastNextBookingAndComments getItemLastNextBookingAndComments(Long itemId, Long userId) {
+        var item = getItem(itemId);
+        BookingDtoSmallBooker lastBooking = null;
+        BookingDtoSmallBooker nextBooking = null;
+        if (item.getOwner().getId().equals(userId)) {
+            lastBooking = BookingMapper.toBookingDtoSmallBooker(findLastBookingById(item.getId()));
+            nextBooking = BookingMapper.toBookingDtoSmallBooker(findNextBookingById(item.getId()));
+        }
+        var comments = findByItem_Id(item.getId()).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+        return ItemMapper.toItemDtoLastNextBookingAndComments(item, lastBooking, nextBooking, comments);
     }
 }
