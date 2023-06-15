@@ -19,6 +19,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserStorage;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +31,10 @@ import java.util.stream.Collectors;
 public class ItemService {
 
 
-    private ItemStorage itemStorage;
-    private UserStorage userStorage;
-    private BookingStorage bookingStorage;
-    private CommentStorage commentStorage;
+    private final ItemStorage itemStorage;
+    private final UserStorage userStorage;
+    private final BookingStorage bookingStorage;
+    private final CommentStorage commentStorage;
 
     @Autowired
     public ItemService(ItemStorage itemStorage, UserStorage userStorage, BookingStorage bookingStorage,
@@ -61,20 +62,19 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage.save(result));
     }
 
+    @Transactional
     public ItemDto patchItem(Item item, Long userId, Long itemId) {
-
         Optional<Item> tempItem = itemStorage.findById(itemId);
         if (tempItem.isEmpty()) {
             log.info("Попытка запросить редактирование отсутствующей вещи. itemId= {}", itemId);
-            throw new BadParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
+            throw new BadParametrException(String.format("Отсутствует запрашиваемая вещь. itemId= %d", itemId));
         }
         if (!userId.equals(tempItem.get().getOwner().getId())) {
             log.info("Попытка редактировать вещь не её владельцем. Полученный владелец: {}"
                     + " , текущий владелец: {}", userId, tempItem.get().getOwner());
-            throw new NotFoundParametrException("Редактировать вещь может только её владелец. Полученный владелец: "
-                    + userId + " , текущий владелец: " + tempItem.get().getOwner());
+            throw new NotFoundParametrException(String.format("Редактировать вещь может только её владелец." +
+                    " Полученный владелец: %d, текущий владелец: %s", userId, tempItem.get().getOwner().toString()));
         }
-
         if (item.getName() != null) {
             tempItem.get().setName(item.getName());
             log.info("у вещи с id {} заменено название на {}", itemId, tempItem.get().getName());
@@ -87,16 +87,15 @@ public class ItemService {
             tempItem.get().setAvailable(item.getAvailable());
             log.info("у вещи с id {} заменен статус на {}", itemId, tempItem.get().getAvailable());
         }
-
-
-        return ItemMapper.toItemDto(itemStorage.save(tempItem.get()));
+        return ItemMapper.toItemDto(tempItem.get());
     }
 
     public Item getItem(Long itemId) {
         Optional<Item> tempItem = itemStorage.findById(itemId);
         if (tempItem.isEmpty()) {
             log.info("Попытка запросить отсутствующую вещь. itemId= {}", itemId);
-            throw new NotFoundParametrException("Отсутствует запрашиваемая вещь. itemId= " + itemId);
+            throw new NotFoundParametrException(String.format("Отсутствует запрашиваемая вещь. itemId= %s",
+                    itemId.toString()));
         }
         return tempItem.get();
     }
@@ -104,8 +103,12 @@ public class ItemService {
     public List<ItemDtoLastNextBookingAndComments> getAllMyItems(Long userId) {
         return itemStorage.findByOwner_idOrderByIdAsc(userId).stream()
                 .map(o -> ItemMapper.toItemDtoLastNextBookingAndComments(o,
-                        BookingMapper.toBookingDtoSmallBooker(bookingStorage.findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(o.getId(), LocalDateTime.now(), EnumStatusBooking.APPROVED)),
-                        BookingMapper.toBookingDtoSmallBooker(bookingStorage.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(o.getId(), LocalDateTime.now(), EnumStatusBooking.APPROVED)),
+                        BookingMapper.toBookingDtoSmallBooker(
+                                bookingStorage.findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(o.getId(),
+                                        LocalDateTime.now(), EnumStatusBooking.APPROVED)),
+                        BookingMapper.toBookingDtoSmallBooker(
+                                bookingStorage.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(o.getId(),
+                                        LocalDateTime.now(), EnumStatusBooking.APPROVED)),
                         commentStorage.findByItem_Id(o.getId()).stream().map(CommentMapper::toCommentDto)
                                 .collect(Collectors.toList())
                 ))
@@ -118,9 +121,8 @@ public class ItemService {
             return new ArrayList<>();
         }
         text = '%' + text + '%';
-        var preRez = itemStorage.findByNameLikeIgnoreCaseOrDescriptionLikeIgnoreCase(text, text);
+        var preRez = itemStorage.findByNameOrDescriptionLikeAndAvailableIsTrue(text);
         return preRez.stream()
-                .filter(Item::getAvailable)
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
@@ -144,8 +146,8 @@ public class ItemService {
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
         if (booking.size() < 1) {
-            throw new BadParametrException("Пользователь не брал в аренду вещь. UserId = " + userId +
-                    " ItemId = " + itemId);
+            throw new BadParametrException(String.format("Пользователь не брал в аренду вещь. UserId = %d ItemId = %d",
+                    userId, itemId));
         }
         comment.setItem(item);
         comment.setAuthor(user.get());
@@ -154,11 +156,13 @@ public class ItemService {
     }
 
     public Booking findLastBookingById(Long itemId) {
-        return bookingStorage.findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(itemId, LocalDateTime.now(), EnumStatusBooking.APPROVED);
+        return bookingStorage.findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(itemId, LocalDateTime.now(),
+                EnumStatusBooking.APPROVED);
     }
 
     public Booking findNextBookingById(Long itemId) {
-        return bookingStorage.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(), EnumStatusBooking.APPROVED);
+        return bookingStorage.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(),
+                EnumStatusBooking.APPROVED);
     }
 
     public List<Comment> findByItem_Id(Long itemId) {

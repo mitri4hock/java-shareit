@@ -1,13 +1,15 @@
 package ru.practicum.shareit.user;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
+@UtilityClass
 public class UserMapper {
 
-    private static final String valueIfNotProvided = "not provided";
+    private final String valueIfNotProvided = "not provided";
 
-    public static UserDto toUserDto(User user) {
+    public UserDto toUserDto(User user) {
         if (user == null) return null;
         return UserDto.builder()
                 .id(user.getId())

@@ -12,17 +12,15 @@ import java.util.List;
 @Builder
 public class ItemDtoLastNextBookingAndComments {
     private Long id;
-    @NotNull
     @NotBlank
     private String name;
-    @NotNull
     @NotBlank
     private String description;
     @NotNull
     private Boolean available;
     private Long owner;
     private Long request;
-    BookingDtoSmallBooker lastBooking;
-    BookingDtoSmallBooker nextBooking;
-    List<CommentDto> comments;
+    private BookingDtoSmallBooker lastBooking;
+    private BookingDtoSmallBooker nextBooking;
+    private List<CommentDto> comments;
 }

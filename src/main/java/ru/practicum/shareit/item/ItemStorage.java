@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
@@ -16,7 +17,10 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
 
     List<Item> findByOwner_idOrderByIdAsc(Long userId);
 
-    List<Item> findByNameLikeIgnoreCaseOrDescriptionLikeIgnoreCase(String name, String description);
+    @Query("select i from Item i " +
+            "where i.available = true " +
+            " and (upper(i.name) like upper(?1) or upper(i.description) like upper(?1))")
+    List<Item> findByNameOrDescriptionLikeAndAvailableIsTrue(String queryString);
 
     List<Item> findByName(String name);
 

@@ -6,28 +6,28 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "item", schema = "public")
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
+    @Size(max = 255)
     private String name;
     @NotBlank
-    @Column(name = "description", nullable = false)
+    @Column(name = "description")
+    @Size(max = 255)
     private String description;
     @NotNull
-    @Column(name = "available", nullable = false)
+    @Column(name = "available")
     private Boolean available;
     @ManyToOne()
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id")
     private User owner;
 }

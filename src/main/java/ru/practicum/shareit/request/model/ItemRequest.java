@@ -4,24 +4,23 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Entity
 @Table(name = "itemRequest", schema = "public")
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
-@Builder
+@Data
+@NoArgsConstructor
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "description")
+    @Size(max = 255)
     private String description;
-    @Column(name = "requestor_id", nullable = false)
+    @Column(name = "requestor_id")
     private Long requestor;
     @NotNull
-    @Column(name = "created", nullable = false)
+    @Column(name = "created")
     private Date created;
 }

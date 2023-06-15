@@ -9,12 +9,11 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
-import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.ItemStorage;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.UserStorage;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +35,12 @@ public class BookingService {
     }
 
     public BookingDto saveBooking(BookingDtoForCreate bookingDtoCreate, Long userId) {
-        if (bookingDtoCreate.getStart().isBefore(LocalDateTime.now()) ||
-                bookingDtoCreate.getEnd().isBefore(bookingDtoCreate.getStart()) ||
+        if (bookingDtoCreate.getEnd().isBefore(bookingDtoCreate.getStart()) ||
                 bookingDtoCreate.getEnd().equals(bookingDtoCreate.getStart())) {
-            throw new BadParametrException("Неверный формат даты старта и окончания бронирования: Start Date: "
-                    + bookingDtoCreate.getStart() + " End Date: " + bookingDtoCreate.getEnd() + " Now: "
-                    + LocalDateTime.now());
+            String str = String.format("Неверный формат даты старта и окончания бронирования: Start Date: %s " +
+                            "End Date: %s Now: %s", bookingDtoCreate.getStart().toString(),
+                    bookingDtoCreate.getEnd().toString(), LocalDateTime.now().toString());
+            throw new BadParametrException(str);
         }
 
         Optional<Item> tempItem = itemStorage.findById(bookingDtoCreate.getItemId());
@@ -51,8 +50,8 @@ public class BookingService {
         }
         var item = tempItem.get();
         if (!item.getAvailable()) {
-            throw new BadParametrException("при бронировании запрошена вещь со статусом Available = false. Item = "
-                    + item);
+            throw new BadParametrException(String.format("при бронировании запрошена вещь со статусом " +
+                    "Available = false. Item = %s", item.toString()));
         }
         if (userStorage.findById(userId).isEmpty()) {
             throw new NotFoundParametrException("при бронировании, был указан несуществующий пользователь владелец");
@@ -70,19 +69,21 @@ public class BookingService {
     public BookingDto findBookingById(Long id, Long userId) {
         var preRez = bookingStorage.findById(id);
         if (preRez.isEmpty()) {
-            throw new NotFoundParametrException("отсутствует бронирование с id = " + id);
+            throw new NotFoundParametrException(String.format("отсутствует бронирование с id = %d", id));
         }
-        if (preRez.get().getBooker().getId().equals(userId) || preRez.get().getItem().getOwner().getId().equals(userId)) {
+        if (preRez.get().getBooker().getId().equals(userId) ||
+                preRez.get().getItem().getOwner().getId().equals(userId)) {
             return BookingMapper.toBookingDto(preRez.get());
         } else {
             throw new NotFoundParametrException("запрашивать бронирование может или автор или владелец вещи");
         }
     }
 
+    @Transactional
     public BookingDto updateApproved(Long bookingId, Boolean approved, Long userId) {
         var rez = bookingStorage.findById(bookingId);
         if (rez.isEmpty()) {
-            throw new NotFoundParametrException("отсутствует бронирование с id = " + bookingId);
+            throw new NotFoundParametrException(String.format("отсутствует бронирование с id = %d", bookingId));
         }
         if (!rez.get().getItem().getOwner().getId().equals(userId)) {
             throw new NotFoundParametrException("Редактировать статус бронирования может только владелец вещи");
@@ -95,12 +96,13 @@ public class BookingService {
         } else {
             rez.get().setStatus(EnumStatusBooking.REJECTED);
         }
-        return BookingMapper.toBookingDto(bookingStorage.save(rez.get()));
+        return BookingMapper.toBookingDto(rez.get());
     }
 
     public List<BookingDto> findAllBookingWithStatus(Long userId, String state) {
         if (userStorage.findById(userId).isEmpty()) {
-            throw new NotFoundParametrException("Запрошены бронирования от несуществующего пользователя. Id = " + userId);
+            throw new NotFoundParametrException(String.format("Запрошены бронирования от несуществующего пользователя." +
+                    " Id = %d", userId));
         }
         List<Booking> preRez;
         switch (state) {
@@ -137,7 +139,8 @@ public class BookingService {
 
     public List<BookingDto> findAllBookingForUserWithStatus(Long userId, String state) {
         if (userStorage.findById(userId).isEmpty()) {
-            throw new NotFoundParametrException("Запрошены бронирования от несуществующего пользователя. Id = " + userId);
+            throw new NotFoundParametrException(String.format("Запрошены бронирования от несуществующего пользователя." +
+                    " Id = %d", userId));
         }
         if (countItemForUser(userId) == 0L) {
             return new ArrayList<>();

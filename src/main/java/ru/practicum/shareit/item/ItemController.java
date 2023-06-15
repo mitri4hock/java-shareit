@@ -29,20 +29,17 @@ import java.util.stream.Collectors;
 public class ItemController {
 
     private final ItemService itemService;
-    private final BookingService bookingService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createItem(@RequestBody @Valid @NotNull Item item,
                               @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-
         return itemService.createItem(item, userId);
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestBody @Valid Comment comment, @PathVariable @NotNull Long itemId,
                                     @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-
         return itemService.createComment(comment, itemId, userId);
 
     }
@@ -51,14 +48,12 @@ public class ItemController {
     public ItemDto patchItem(@RequestBody @NotNull Item item,
                              @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId,
                              @PathVariable @NotNull Long itemId) {
-
         return itemService.patchItem(item, userId, itemId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDtoLastNextBookingAndComments getItem(@PathVariable Long itemId,
                                                      @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-
         return itemService.getItemLastNextBookingAndComments(itemId, userId);
     }
 
