@@ -22,36 +22,38 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final String headerUserIdField = "X-Sharer-User-Id";
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createItem(@RequestBody @Valid @NotNull Item item,
-                              @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
+                              @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return itemService.createItem(item, userId);
     }
 
+    @ResponseStatus(HttpStatus.OK) //для тестов постмана
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestBody @Valid Comment comment, @PathVariable @NotNull Long itemId,
-                                    @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
+                                    @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return itemService.createComment(comment, itemId, userId);
 
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto patchItem(@RequestBody @NotNull Item item,
-                             @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId,
+                             @RequestHeader(value = headerUserIdField) @NotNull Long userId,
                              @PathVariable @NotNull Long itemId) {
         return itemService.patchItem(item, userId, itemId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDtoLastNextBookingAndComments getItem(@PathVariable Long itemId,
-                                                     @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
+                                                     @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return itemService.getItemLastNextBookingAndComments(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDtoLastNextBookingAndComments> getAllMyItems(@RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
+    public List<ItemDtoLastNextBookingAndComments> getAllMyItems(@RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return itemService.getAllMyItems(userId);
     }
 

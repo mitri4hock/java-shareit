@@ -28,7 +28,6 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public UserDto patchUser(@RequestBody @NotNull User user, @PathVariable @NotNull Long userId) {
-
         return userService.patchUser(user, userId);
     }
 

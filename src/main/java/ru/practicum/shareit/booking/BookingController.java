@@ -17,43 +17,40 @@ import java.util.List;
 @AllArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
+    private final String headerUserIdField = "X-Sharer-User-Id";
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Validated
     public BookingDto createBooking(@RequestBody @Valid @NotNull BookingDtoForCreate bookingDtoCreate,
-                                    @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
+                                    @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return bookingService.saveBooking(bookingDtoCreate, userId);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDto verificationBooking(@PathVariable Long bookingId,
-                                          @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId,
+                                          @RequestHeader(value = headerUserIdField) @NotNull Long userId,
                                           @RequestParam(value = "approved") Boolean approved) {
-
         return bookingService.updateApproved(bookingId, approved, userId);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto getBooking(@PathVariable Long bookingId,
-                                 @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-
+                                 @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return bookingService.findBookingById(bookingId, userId);
     }
 
     @GetMapping
     public List<BookingDto> findAllBookingWithStatus(
             @RequestParam(value = "state", defaultValue = "ALL") String state,
-            @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-
+            @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return bookingService.findAllBookingWithStatus(userId, state);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> findAllBookingForUserWithStatus(
             @RequestParam(value = "state", defaultValue = "ALL") String state,
-            @RequestHeader(value = "X-Sharer-User-Id") @NotNull Long userId) {
-
+            @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
         return bookingService.findAllBookingForUserWithStatus(userId, state);
     }
 

@@ -150,7 +150,6 @@ public class ItemService {
         }
         comment.setItem(item);
         comment.setAuthor(user.get());
-        comment.setCreated(LocalDateTime.now());
         return CommentMapper.toCommentDto(commentStorage.save(comment));
     }
 

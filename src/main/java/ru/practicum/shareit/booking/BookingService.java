@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class BookingService {
+public class BookingService  {
     private final BookingStorage bookingStorage;
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
@@ -33,6 +33,7 @@ public class BookingService {
         this.userStorage = userStorage;
         this.itemStorage = itemStorage;
     }
+
 
     public BookingDto saveBooking(BookingDtoForCreate bookingDtoCreate, Long userId) {
         if (bookingDtoCreate.getEnd().isBefore(bookingDtoCreate.getStart()) ||
@@ -66,6 +67,7 @@ public class BookingService {
         return BookingMapper.toBookingDto(rez);
     }
 
+
     public BookingDto findBookingById(Long id, Long userId) {
         var preRez = bookingStorage.findById(id);
         if (preRez.isEmpty()) {
@@ -78,6 +80,7 @@ public class BookingService {
             throw new NotFoundParametrException("запрашивать бронирование может или автор или владелец вещи");
         }
     }
+
 
     @Transactional
     public BookingDto updateApproved(Long bookingId, Boolean approved, Long userId) {
@@ -98,6 +101,7 @@ public class BookingService {
         }
         return BookingMapper.toBookingDto(rez.get());
     }
+
 
     public List<BookingDto> findAllBookingWithStatus(Long userId, String state) {
         if (userStorage.findById(userId).isEmpty()) {
@@ -133,9 +137,11 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
+
     public long countItemForUser(Long userId) {
         return itemStorage.countDistinctByOwner_Id(userId);
     }
+
 
     public List<BookingDto> findAllBookingForUserWithStatus(Long userId, String state) {
         if (userStorage.findById(userId).isEmpty()) {
