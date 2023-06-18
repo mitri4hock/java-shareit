@@ -1,12 +1,11 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
