@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserStorage userStorage;
@@ -42,18 +43,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDto getUserById(Long userId) {
-        var rez = userStorage.findById(userId);
-        if (rez.isEmpty()) {
+        var rez = userStorage.findById(userId).orElseThrow(() -> {
             throw new NotFoundParametrException(String.format("Отсутствует запрашиваемый пользователь. userId= %d",
                     userId));
-        }
-        return UserMapper.toUserDto(rez.get());
+        });
+        return UserMapper.toUserDto(rez);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         return userStorage.findAll().stream()
                 .map(UserMapper::toUserDto)

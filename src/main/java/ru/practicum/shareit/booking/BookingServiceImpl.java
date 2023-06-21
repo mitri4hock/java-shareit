@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     private final BookingStorage bookingStorage;
     private final UserStorage userStorage;
@@ -39,12 +40,10 @@ public class BookingServiceImpl implements BookingService {
             throw new BadParametrException(str);
         }
 
-        Optional<Item> tempItem = itemStorage.findById(bookingDtoCreate.getItemId());
-        if (tempItem.isEmpty()) {
+        Item item = itemStorage.findById(bookingDtoCreate.getItemId()).orElseThrow(() -> {
             log.info("при бронировании, была указана несуществующая вещь");
             throw new NotFoundParametrException("при бронировании, была указана несуществующая вещь");
-        }
-        var item = tempItem.get();
+        });
         if (!item.getAvailable()) {
             throw new BadParametrException(String.format("при бронировании запрошена вещь со статусом " +
                     "Available = false. Item = %s", item.toString()));
@@ -63,44 +62,39 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BookingDto findBookingById(Long id, Long userId) {
-        var preRez = bookingStorage.findById(id);
-        if (preRez.isEmpty()) {
+        var preRez = bookingStorage.findById(id).orElseThrow(() -> {
             throw new NotFoundParametrException(String.format("отсутствует бронирование с id = %d", id));
-        }
-        if (preRez.get().getBooker().getId().equals(userId) ||
-                preRez.get().getItem().getOwner().getId().equals(userId)) {
-            return BookingMapper.toBookingDto(preRez.get());
+        });
+        if (preRez.getBooker().getId().equals(userId) ||
+                preRez.getItem().getOwner().getId().equals(userId)) {
+            return BookingMapper.toBookingDto(preRez);
         } else {
             throw new NotFoundParametrException("запрашивать бронирование может или автор или владелец вещи");
         }
     }
 
-
     @Override
     @Transactional
     public BookingDto updateApproved(Long bookingId, Boolean approved, Long userId) {
-        var rez = bookingStorage.findById(bookingId);
-        if (rez.isEmpty()) {
+        var rez = bookingStorage.findById(bookingId).orElseThrow(() -> {
             throw new NotFoundParametrException(String.format("отсутствует бронирование с id = %d", bookingId));
-        }
-        if (!rez.get().getItem().getOwner().getId().equals(userId)) {
+        });
+        if (!rez.getItem().getOwner().getId().equals(userId)) {
             throw new NotFoundParametrException("Редактировать статус бронирования может только владелец вещи");
         }
         if (approved == true) {
-            if (rez.get().getStatus() == EnumStatusBooking.APPROVED) {
+            if (rez.getStatus() == EnumStatusBooking.APPROVED) {
                 throw new BadParametrException("статус бронирование уже установлен на APPROVED");
             }
-            rez.get().setStatus(EnumStatusBooking.APPROVED);
+            rez.setStatus(EnumStatusBooking.APPROVED);
         } else {
-            rez.get().setStatus(EnumStatusBooking.REJECTED);
+            rez.setStatus(EnumStatusBooking.REJECTED);
         }
-        return BookingMapper.toBookingDto(rez.get());
+        return BookingMapper.toBookingDto(rez);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> findAllBookingWithStatus(Long userId, String state) {
         if (userStorage.findById(userId).isEmpty()) {
             throw new NotFoundParametrException(String.format("Запрошены бронирования от несуществующего пользователя." +
@@ -136,7 +130,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public long countItemForUser(Long userId) {
         return itemStorage.countDistinctByOwner_Id(userId);
     }

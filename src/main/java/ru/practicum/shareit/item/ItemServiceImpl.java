@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
 
     private final ItemStorage itemStorage;
@@ -37,7 +38,6 @@ public class ItemServiceImpl implements ItemService {
     private final CommentStorage commentStorage;
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<User> getUserById(Long userId) {
         Optional<User> rezQuery = userStorage.findById(userId);
         if (rezQuery.isEmpty()) {
@@ -60,46 +60,43 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto patchItem(Item item, Long userId, Long itemId) {
-        Optional<Item> tempItem = itemStorage.findById(itemId);
-        if (tempItem.isEmpty()) {
+        Item tempItem = itemStorage.findById(itemId).orElseThrow(() -> {
             log.info("Попытка запросить редактирование отсутствующей вещи. itemId= {}", itemId);
             throw new BadParametrException(String.format("Отсутствует запрашиваемая вещь. itemId= %d", itemId));
-        }
-        if (!userId.equals(tempItem.get().getOwner().getId())) {
+        });
+        if (!userId.equals(tempItem.getOwner().getId())) {
             log.info("Попытка редактировать вещь не её владельцем. Полученный владелец: {}"
-                    + " , текущий владелец: {}", userId, tempItem.get().getOwner());
+                    + " , текущий владелец: {}", userId, tempItem.getOwner());
             throw new NotFoundParametrException(String.format("Редактировать вещь может только её владелец." +
-                    " Полученный владелец: %d, текущий владелец: %s", userId, tempItem.get().getOwner().toString()));
+                    " Полученный владелец: %d, текущий владелец: %s", userId, tempItem.getOwner().toString()));
         }
         if (item.getName() != null) {
-            tempItem.get().setName(item.getName());
-            log.info("у вещи с id {} заменено название на {}", itemId, tempItem.get().getName());
+            tempItem.setName(item.getName());
+            log.info("у вещи с id {} заменено название на {}", itemId, tempItem.getName());
         }
         if (item.getDescription() != null) {
-            tempItem.get().setDescription(item.getDescription());
-            log.info("у вещи с id {} заменено описание на {}", itemId, tempItem.get().getDescription());
+            tempItem.setDescription(item.getDescription());
+            log.info("у вещи с id {} заменено описание на {}", itemId, tempItem.getDescription());
         }
         if (item.getAvailable() != null) {
-            tempItem.get().setAvailable(item.getAvailable());
-            log.info("у вещи с id {} заменен статус на {}", itemId, tempItem.get().getAvailable());
+            tempItem.setAvailable(item.getAvailable());
+            log.info("у вещи с id {} заменен статус на {}", itemId, tempItem.getAvailable());
         }
-        return ItemMapper.toItemDto(tempItem.get());
+        return ItemMapper.toItemDto(tempItem);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Item getItem(Long itemId) {
-        Optional<Item> tempItem = itemStorage.findById(itemId);
-        if (tempItem.isEmpty()) {
+        Item tempItem = itemStorage.findById(itemId).orElseThrow(() -> {
             log.info("Попытка запросить отсутствующую вещь. itemId= {}", itemId);
             throw new NotFoundParametrException(String.format("Отсутствует запрашиваемая вещь. itemId= %s",
                     itemId.toString()));
-        }
-        return tempItem.get();
+        });
+
+        return tempItem;
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDtoLastNextBookingAndComments> getAllMyItems(Long userId) {
         return itemStorage.findByOwner_idOrderByIdAsc(userId).stream()
                 .map(o -> ItemMapper.toItemDtoLastNextBookingAndComments(o,
@@ -117,7 +114,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDto> findItem(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
@@ -138,11 +134,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto createComment(Comment comment, Long itemId, Long userId) {
-        var user = getUserById(userId);
-        if (user.isEmpty()) {
+        var user = getUserById(userId).orElseThrow(() -> {
             throw new NotFoundParametrException("при создании комментария, был указан несуществующий " +
                     "пользователь комментатор");
-        }
+        });
         var item = getItem(itemId);
         if (item == null) {
             throw new NotFoundParametrException("при создании комментария, была указана несуществующая вещь");
@@ -156,32 +151,28 @@ public class ItemServiceImpl implements ItemService {
                     userId, itemId));
         }
         comment.setItem(item);
-        comment.setAuthor(user.get());
+        comment.setAuthor(user);
         return CommentMapper.toCommentDto(commentStorage.save(comment));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Booking findLastBookingById(Long itemId) {
         return bookingStorage.findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(itemId, LocalDateTime.now(),
                 EnumStatusBooking.APPROVED);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Booking findNextBookingById(Long itemId) {
         return bookingStorage.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(),
                 EnumStatusBooking.APPROVED);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Comment> findByItem_Id(Long itemId) {
         return commentStorage.findByItem_Id(itemId);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ItemDtoLastNextBookingAndComments getItemLastNextBookingAndComments(Long itemId, Long userId) {
         var item = getItem(itemId);
         BookingDtoSmallBooker lastBooking = null;
