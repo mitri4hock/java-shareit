@@ -1,20 +1,26 @@
 package ru.practicum.shareit.request.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-import javax.validation.constraints.Min;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
+@Entity
+@Table(name = "itemRequest", schema = "public")
 @Data
-@Builder
+@NoArgsConstructor
 public class ItemRequest {
-    @Min(0)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "description")
+    @Size(max = 255)
     private String description;
-    @Min(0)
+    @Column(name = "requestor_id")
     private Long requestor;
     @NotNull
+    @Column(name = "created")
     private Date created;
 }

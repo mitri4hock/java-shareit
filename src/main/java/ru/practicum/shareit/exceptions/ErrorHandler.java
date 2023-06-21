@@ -13,7 +13,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> badParamException(final BadParametrException e) {
-        return Map.of("неверные параметры запроса", e.getMessage());
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler

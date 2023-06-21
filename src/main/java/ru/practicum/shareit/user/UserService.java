@@ -1,49 +1,19 @@
 package ru.practicum.shareit.user;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.ConflictParametrException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.model.User;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.List;
 
-@Service
-@Slf4j
-public class UserService {
-    private final UserStorage userStorage;
+public interface UserService {
 
-    @Autowired
-    UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    UserDto createUser(User user);
 
-    public UserDto createUser(UserDto userDto) {
-        if (userStorage.isUsersEmailDuplicate(userDto)) {
-            throw new ConflictParametrException("при создании пользователя передан Email уже существующего пользователя");
-        }
-        return userStorage.createUser(userDto);
-    }
+    UserDto patchUser(User user, Long userId);
 
-    public UserDto patchUser(UserDto userDto, Long userId) {
-        userDto.setId(userId);
-        if (userStorage.isUsersEmailDuplicate(userDto)) {
-            throw new ConflictParametrException("при обновлении пользователя передан Email уже существующего пользователя");
-        }
-        return userStorage.patchUser(userDto, userId);
-    }
+    UserDto getUserById(Long userId);
 
-    public Optional<UserDto> getUserById(Long userId) {
-        return userStorage.getUserById(userId);
-    }
+    List<UserDto> getAllUsers();
 
-    public Set<UserDto> getAllUsers() {
-        return userStorage.getAllUsers();
-    }
-
-    public UserDto deleteUserById(Long userId) {
-        return userStorage.deleteUserById(userId);
-    }
+    void deleteUserById(Long userId);
 }
