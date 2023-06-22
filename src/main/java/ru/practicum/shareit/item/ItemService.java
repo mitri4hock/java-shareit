@@ -36,4 +36,6 @@ public interface ItemService {
     List<Comment> findByItem_Id(Long itemId);
 
     ItemDtoLastNextBookingAndComments getItemLastNextBookingAndComments(Long itemId, Long userId);
+
+
 }
