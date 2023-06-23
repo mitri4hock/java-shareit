@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ItemRequestStorage extends JpaRepository<ItemRequest, Long> {
@@ -13,4 +14,8 @@ public interface ItemRequestStorage extends JpaRepository<ItemRequest, Long> {
 
     List<ItemRequest> findByRequestor_IdOrderByCreatedDesc(Long id);
 
+    List<ItemRequest> findAllByOrderByCreatedDesc();
+
+    @Override
+    Optional<ItemRequest> findById(Long requestId);
 }

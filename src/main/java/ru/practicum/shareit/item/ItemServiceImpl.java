@@ -52,7 +52,6 @@ public class ItemServiceImpl implements ItemService {
         if (getUserById(userId).isEmpty()) {
             throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
         }
-        // Item result = item;
         item.setOwner(userStorage.findById(userId).get());
         var rez = itemStorage.save(item);
         return ItemMapper.toItemDto(rez);
