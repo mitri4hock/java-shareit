@@ -15,6 +15,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoLastNextBookingAndComments;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequestStorage;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserStorage;
 import ru.practicum.shareit.user.model.User;
 
@@ -36,6 +38,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage userStorage;
     private final BookingStorage bookingStorage;
     private final CommentStorage commentStorage;
+    private final ItemRequestStorage itemRequestStorage;
 
     @Override
     public Optional<User> getUserById(Long userId) {
@@ -48,11 +51,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto createItem(Item item, Long userId) {
+    public ItemDto createItem(ItemDto itemDto, Long userId) {
         if (getUserById(userId).isEmpty()) {
             throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
         }
+        Item item = ItemMapper.toItem(itemDto);
         item.setOwner(userStorage.findById(userId).get());
+        if (itemDto.getRequestId() != null){
+            item.setRequestId(itemRequestStorage.findById(itemDto.getRequestId()).orElse(null));
+        }
         var rez = itemStorage.save(item);
         return ItemMapper.toItemDto(rez);
     }

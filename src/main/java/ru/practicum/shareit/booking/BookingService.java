@@ -12,9 +12,9 @@ public interface BookingService {
 
     BookingDto updateApproved(Long bookingId, Boolean approved, Long userId);
 
-    List<BookingDto> findAllBookingWithStatus(Long userId, String state);
+    List<BookingDto> findAllBookingWithStatus(Long userId, String state, Integer from, Integer size);
 
     long countItemForUser(Long userId);
 
-    List<BookingDto> findAllBookingForUserWithStatus(Long userId, String state);
+    List<BookingDto> findAllBookingForUserWithStatus(Long userId, String state, Integer from, Integer size);
 }

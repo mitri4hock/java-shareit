@@ -11,7 +11,7 @@ public interface ItemRequestService {
 
     List<ItemRequestDto> findItemRequestForMe(Long userId);
 
-    List<ItemRequestDto> findAllRequest(Integer from, Integer size);
+    List<ItemRequestDto> findAllRequest(Integer from, Integer size, Long userId);
 
-    ItemRequestDto findById(Long requestId);
+    ItemRequestDto findById(Long requestId, Long userId);
 }

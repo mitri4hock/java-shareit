@@ -26,9 +26,9 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto createItem(@RequestBody @Valid @NotNull Item item,
+    public ItemDto createItem(@RequestBody @Valid @NotNull ItemDto itemDto,
                               @RequestHeader(value = headerUserIdField) @NotNull Long userId) {
-        return itemService.createItem(item, userId);
+        return itemService.createItem(itemDto, userId);
     }
 
     @ResponseStatus(HttpStatus.OK) //для тестов постмана

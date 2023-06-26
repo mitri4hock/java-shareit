@@ -15,6 +15,14 @@ public class ItemMapper {
 
     private final String descriptionIfEnterDescriptionIsNull = "not provided";
 
+    public Item toItem(ItemDto itemDto) {
+        Item rez = new Item();
+        rez.setName(itemDto.getName());
+        rez.setDescription(itemDto.getDescription());
+        rez.setAvailable(itemDto.getAvailable());
+        return rez;
+    }
+
     public ItemDto toItemDto(Item item) {
         return ItemDto.builder()
                 .id(item.getId())
@@ -22,6 +30,7 @@ public class ItemMapper {
                 .description(item.getDescription() != null ? item.getDescription() : descriptionIfEnterDescriptionIsNull)
                 .available(item.getAvailable())
                 .owner(item.getOwner().getId())
+                .requestId(item.getRequestId() != null ? item.getRequestId().getId() : null)
                 .build();
     }
 
@@ -42,7 +51,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public ItemForRequestDto toItemForRequestDto (Item item){
+    public ItemForRequestDto toItemForRequestDto(Item item) {
         return ItemForRequestDto.builder()
                 .id(item.getId())
                 .name(item.getName())

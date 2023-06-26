@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "itemRequest", schema = "public")
+@Table(name = "item_request", schema = "public")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

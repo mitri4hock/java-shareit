@@ -59,7 +59,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> findAllRequest(Integer from, Integer size) {
+    public List<ItemRequestDto> findAllRequest(Integer from, Integer size, Long userId) {
         if (from == null && size == null) {
             return itemRequestStorage.findAllByOrderByCreatedDesc().stream()
                     .map(x -> ItemRequestMapper.toItemRequstDto(x,
@@ -72,11 +72,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new BadParametrException(String.format("При запросе ItemRequest были переданы неверные параметры: " +
                     "from: %d, size: %d", from, size));
         }
-        //Sort sortById = Sort.by(Sort.Direction.DESC, "created");
         Sort sortById = Sort.by(Sort.Order.desc("created"));
         Pageable page = PageRequest.of(from, size, sortById);
-        Page<ItemRequest> itemRequestPage = itemRequestStorage.findAll(page);
-        return itemRequestPage.getContent().stream()
+        var itemRequestPage = itemRequestStorage.findByRequestor_Id(userId, page);
+        return itemRequestPage.stream()
                 .map(x -> ItemRequestMapper.toItemRequstDto(x,
                         itemStorage.findByRequestId_IdOrderByIdAsc(x.getId()).stream()
                                 .map(ItemMapper::toItemForRequestDto)
@@ -85,7 +84,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public ItemRequestDto findById(Long requestId) {
+    public ItemRequestDto findById(Long requestId, Long userId) {
+        if (userStorage.findById(userId).isEmpty()) {
+            throw new NotFoundParametrException("указан несуществующий пользователь");
+        }
         if (requestId < 1) {
             throw new BadParametrException(String.format("При запросе ItemRequest был передан неверный id запроса: " +
                     "id = %d", requestId));
