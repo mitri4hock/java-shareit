@@ -7,8 +7,6 @@ import ru.practicum.shareit.request.dto.ItemRequestForCreateDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +20,7 @@ public class ItemRequestMapper {
                 itemRequestForCreateDto.getCreated());
     }
 
-    public ItemRequestDto toItemRequstDto(ItemRequest itemRequest, List<ItemForRequestDto> itemForRequestDto){
+    public ItemRequestDto toItemRequstDto(ItemRequest itemRequest, List<ItemForRequestDto> itemForRequestDto) {
         return ItemRequestDto.builder()
                 .id(itemRequest.getId())
                 .description((itemRequest.getDescription()))
@@ -31,7 +29,7 @@ public class ItemRequestMapper {
                 .build();
     }
 
-    public ItemRequestDto toItemRequstDto(ItemRequest itemRequest){
+    public ItemRequestDto toItemRequstDto(ItemRequest itemRequest) {
         return ItemRequestDto.builder()
                 .id(itemRequest.getId())
                 .description((itemRequest.getDescription()))

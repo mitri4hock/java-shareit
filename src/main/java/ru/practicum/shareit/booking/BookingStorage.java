@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.EnumStatusBooking;
@@ -43,7 +42,6 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     List<Booking> findByBooker_IdOrderByStartDesc(Long bookerId);
 
-    //List<Booking> findByBooker_Id(Long bookerId, Pageable pageable);
     Page<Booking> findByBooker_Id(Long bookerId, Pageable pageable);
 
     List<Booking> findByBooker_IdAndStartBeforeAndEndAfterOrderByIdAsc(Long id, LocalDateTime start, LocalDateTime end);

@@ -8,6 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.util.Assert;
 import ru.practicum.shareit.booking.dto.BookingDtoForCreate;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.EnumStatusBooking;
@@ -19,7 +22,10 @@ import ru.practicum.shareit.user.UserStorage;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,10 +38,7 @@ class BookingServiceImplTest {
     UserStorage mockUserStorage;
     @Mock
     ItemStorage mockItemStorage;
-    //@InjectMocks
     BookingServiceImpl bookingServiceImpl;
-
-
 
 
     @BeforeEach
@@ -187,32 +190,278 @@ class BookingServiceImplTest {
 
 
         owner.setId(userId);
-        approved = true;
         booking.setStatus(EnumStatusBooking.APPROVED);
 
         Assertions.assertThrows(BadParametrException.class, () -> {
-            bookingServiceImpl.updateApproved(bookingId, approved, userId);
+            bookingServiceImpl.updateApproved(bookingId, true, userId);
         });
 
 
-//        approved = false;
-//
-//        Assertions.assertThrows(BadParametrException.class, () -> {
-//            bookingServiceImpl.updateApproved(bookingId, approved, userId);
-//        });
+        booking.setStatus(EnumStatusBooking.WAITING);
 
+        Assertions.assertEquals(EnumStatusBooking.APPROVED,
+                bookingServiceImpl.updateApproved(bookingId, true, userId).getStatus());
 
+        Assertions.assertEquals(EnumStatusBooking.REJECTED,
+                bookingServiceImpl.updateApproved(bookingId, false, userId).getStatus());
     }
 
     @Test
-    void findAllBookingWithStatus() {
+    void findAllBookingWithStatus_AllTest() {
+        Long userId = 1L;
+        String state = "ALL";
+        Integer from = 0;
+        Integer size = 1;
+
+        Mockito
+                .when(mockUserStorage.findById(Mockito.anyLong()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(NotFoundParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingWithStatus(userId, state, from, size);
+        });
+
+
+        Mockito
+                .when(mockUserStorage.findById(Mockito.anyLong()))
+                .thenReturn(Optional.of(new User()));
+
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingWithStatus(userId, state, -1, size);
+        });
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingWithStatus(userId, state, from, 0);
+        });
+
+        var testRez = List.of(new Booking()).stream()
+                .map(BookingMapper::toBookingDto)
+                .collect(Collectors.toList());
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdOrderByStartDesc(Mockito.anyLong()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "ALL", null, null));
+
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndStartBeforeAndEndAfterOrderByIdAsc(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "CURRENT", null, null));
+
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(Mockito.anyLong(),
+                        Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "PAST", null, null));
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndStartAfterOrderByStartDesc(Mockito.anyLong(),
+                        Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "FUTURE", null, null));
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndStatusOrderByStartDesc(Mockito.anyLong(),
+                        Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "WAITING", null, null));
+
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "REJECTED", null, null));
+
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingWithStatus(userId, "ASDASDASD", null, null);
+        });
+
+        //----
+        Mockito
+                .when(mockBookingStorage.findByBooker_Id(Mockito.any(), Mockito.any()))
+                .thenReturn(new PageImpl(List.of(new Booking())));
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingWithStatus(userId, "ALL", 3, 1);
+        });
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "ALL", 0, 1));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "ALL", 0, 2));
+
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndStartBeforeAndEndAfter(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "CURRENT", 0, 1));
+
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndEndBefore(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "PAST", 0, 1));
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndStartAfter(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "FUTURE", 0, 1));
+
+        Mockito
+                .when(mockBookingStorage.findByBooker_IdAndStatus(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "WAITING", 0, 1));
+
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingWithStatus(userId, "REJECTED", 0, 1));
+
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingWithStatus(userId, "ASDASDASD", 0, 1);
+        });
     }
 
     @Test
     void countItemForUser() {
+        Long rez = 1L;
+        Mockito
+                .when(mockItemStorage.countDistinctByOwner_Id(Mockito.anyLong()))
+                .thenReturn(rez);
+        Assertions.assertEquals(rez, bookingServiceImpl.countItemForUser(1L));
     }
 
     @Test
     void findAllBookingForUserWithStatus() {
+        Long userId = 100L;
+        String state = "ALL";
+        Integer from = 0;
+        Integer size = 1;
+
+        Mockito
+                .when(mockUserStorage.findById(userId))
+                .thenReturn(Optional.empty());
+        Assertions.assertThrows(NotFoundParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingForUserWithStatus(userId, state, from, size);
+        });
+
+        Mockito
+                .when(mockUserStorage.findById(1L))
+                .thenReturn(Optional.of(new User()));
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingForUserWithStatus(1L, state, -1, size);
+        });
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingForUserWithStatus(1L, state, from, 0);
+        });
+
+        Mockito
+                .when(mockItemStorage.countDistinctByOwner_Id(Mockito.anyLong()))
+                .thenReturn(0L);
+        Assertions.assertEquals(new ArrayList<>(),
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, state, 0, 1));
+
+        //--
+        Mockito
+                .when(mockItemStorage.countDistinctByOwner_Id(Mockito.anyLong()))
+                .thenReturn(1L);
+        var testRez = List.of(new Booking()).stream()
+                .map(BookingMapper::toBookingDto)
+                .collect(Collectors.toList());
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdOrderByStartDesc(Mockito.anyLong()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "ALL", null, null));
+
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "CURRENT", null, null));
+
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndEndBeforeOrderByStartDesc(Mockito.anyLong(),
+                        Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "PAST", null, null));
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndStartAfterOrderByStartDesc(Mockito.anyLong(),
+                        Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "FUTURE", null, null));
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndStatusOrderByStartDesc(Mockito.anyLong(),
+                        Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "WAITING", null, null));
+
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "REJECTED", null, null));
+
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingForUserWithStatus(1L, "ASDASDASD", null, null);
+        });
+
+        //--
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_Id(Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "ALL", 0, 1));
+
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndStartBeforeAndEndAfter(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "CURRENT", 0, 1));
+
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndEndBefore(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "PAST", 0, 1));
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndStartAfter(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "FUTURE", 0, 1));
+
+        Mockito
+                .when(mockBookingStorage.findByItem_Owner_IdAndStatus(Mockito.anyLong(),
+                        Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(new Booking()));
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "WAITING", 0, 1));
+
+        Assertions.assertEquals(testRez,
+                bookingServiceImpl.findAllBookingForUserWithStatus(1L, "REJECTED", 0, 1));
+
+        Assertions.assertThrows(BadParametrException.class, () -> {
+            bookingServiceImpl.findAllBookingForUserWithStatus(1L, "ASDASDASD", 0, 1);
+        });
+
+
     }
 }

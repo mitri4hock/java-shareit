@@ -105,7 +105,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundParametrException(String.format("Запрошены бронирования от несуществующего пользователя." +
                     " Id = %d", userId));
         }
-        if ((from != null && from < 0) || (size!= null && size < 1)) {
+        if ((from != null && from < 0) || (size != null && size < 1)) {
             throw new BadParametrException(String.format("При запросе ItemRequest были переданы неверные параметры: " +
                     "from: %d, size: %d", from, size));
         }
@@ -146,7 +146,7 @@ public class BookingServiceImpl implements BookingService {
                         throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
                     }
                     if (from + size > totalElements) {
-                        int sizeNew = (int)totalElements - from;
+                        int sizeNew = (int) totalElements - from;
                         page = PageRequest.of(from, sizeNew, sortBy);
                         prePreRez = bookingStorage.findByBooker_Id(userId, page);
                     }
@@ -199,7 +199,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundParametrException(String.format("Запрошены бронирования от несуществующего пользователя." +
                     " Id = %d", userId));
         }
-        if ((from != null && from < 0) || (size!= null && size < 1)) {
+        if ((from != null && from < 0) || (size != null && size < 1)) {
             throw new BadParametrException(String.format("При запросе ItemRequest были переданы неверные параметры: " +
                     "from: %d, size: %d", from, size));
         }

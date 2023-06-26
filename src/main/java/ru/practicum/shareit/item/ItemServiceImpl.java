@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.dto.ItemDtoLastNextBookingAndComments;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestStorage;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserStorage;
 import ru.practicum.shareit.user.model.User;
 
@@ -57,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(userStorage.findById(userId).get());
-        if (itemDto.getRequestId() != null){
+        if (itemDto.getRequestId() != null) {
             item.setRequestId(itemRequestStorage.findById(itemDto.getRequestId()).orElse(null));
         }
         var rez = itemStorage.save(item);
