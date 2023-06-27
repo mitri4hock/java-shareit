@@ -145,9 +145,6 @@ public class ItemServiceImpl implements ItemService {
                     "пользователь комментатор");
         });
         var item = getItem(itemId);
-        if (item == null) {
-            throw new NotFoundParametrException("при создании комментария, была указана несуществующая вещь");
-        }
         var preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
         var booking = preRez.stream()
                 .map(BookingMapper::toBookingDto)
