@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,14 +12,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,13 +36,9 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         mapper.findAndRegisterModules();
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(userController)
-                .build();
+        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
 
-        returnObject = BookingDto.builder()
-                .id(1L)
-                .build();
+        returnObject = BookingDto.builder().id(1L).build();
     }
 
     @Test
@@ -54,16 +47,9 @@ class UserControllerTest {
         user.setName("testName");
         user.setEmail("testEmail@test.test");
 
-        when(userService.createUser(any()))
-                .thenReturn(UserDto.builder().build());
+        when(userService.createUser(any())).thenReturn(UserDto.builder().build());
 
-        mockMvc.perform(post("/users")
-                        .content(mapper.writeValueAsString(user))
-                        .header("X-Sharer-User-Id", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+        mockMvc.perform(post("/users").content(mapper.writeValueAsString(user)).header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
     }
 
     @Test
@@ -72,52 +58,28 @@ class UserControllerTest {
         user.setName("testName");
         user.setEmail("testEmail@test.test");
 
-        when(userService.patchUser(any(), any()))
-                .thenReturn(UserDto.builder().build());
+        when(userService.patchUser(any(), any())).thenReturn(UserDto.builder().build());
 
-        mockMvc.perform(patch("/users/1")
-                        .content(mapper.writeValueAsString(user))
-                        .header("X-Sharer-User-Id", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mockMvc.perform(patch("/users/1").content(mapper.writeValueAsString(user)).header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
     void getUserById() throws Exception {
-        when(userService.getUserById(any()))
-                .thenReturn(UserDto.builder().build());
+        when(userService.getUserById(any())).thenReturn(UserDto.builder().build());
 
-        mockMvc.perform(get("/users/1")
-                        .header("X-Sharer-User-Id", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/users/1").header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
     void getAllUsers() throws Exception {
-        when(userService.getAllUsers())
-                .thenReturn(List.of(UserDto.builder().build()));
+        when(userService.getAllUsers()).thenReturn(List.of(UserDto.builder().build()));
 
-        mockMvc.perform(get("/users")
-                        .header("X-Sharer-User-Id", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/users").header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
     void deleteUserById() throws Exception {
-        mockMvc.perform(delete("/users/1")
-                        .header("X-Sharer-User-Id", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/users/1").header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
         Mockito.verify(userService, Mockito.times(1)).deleteUserById(1L);
 
