@@ -60,7 +60,7 @@ class ItemRequestServiceImplTest {
                 .thenReturn(Optional.empty());
 
         Assertions.assertThrows(NotFoundParametrException.class, () -> {
-            itemRequestService.createItemRequest(ItemRequestForCreateDto.builder().build(), 1L);
+            itemRequestService.createItemRequest(new ItemRequestForCreateDto(), 1L);
         });
 
         when(mockUserStorage.findById(Mockito.anyLong()))
@@ -68,7 +68,7 @@ class ItemRequestServiceImplTest {
         when(mockItemRequestStorage.save(any()))
                 .thenReturn(new ItemRequest());
         Assertions.assertEquals(ItemRequestMapper.toItemRequstDto(new ItemRequest()),
-                itemRequestService.createItemRequest(ItemRequestForCreateDto.builder().build(), 1L));
+                itemRequestService.createItemRequest(new ItemRequestForCreateDto(), 1L));
     }
 
     @Test

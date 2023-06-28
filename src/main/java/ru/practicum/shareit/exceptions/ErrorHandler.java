@@ -17,12 +17,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> conflictParamException(final ConflictParametrException e) {
-        return Map.of("конфликт параметра", e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> contFoundParamException(final NotFoundParametrException e) {
         return Map.of("не найден параметр", e.getMessage());

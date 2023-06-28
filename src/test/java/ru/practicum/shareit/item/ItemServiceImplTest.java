@@ -79,16 +79,15 @@ class ItemServiceImplTest {
         when(itemService.getUserById(any()))
                 .thenReturn(Optional.empty());
         Assertions.assertThrows(NotFoundParametrException.class, () -> {
-            itemService.createItem(ItemDto.builder().build(), 1L);
+            itemService.createItem(new ItemDto(), 1L);
         });
 
         Item item = new Item();
         User user = new User();
         user.setId(1L);
         item.setOwner(user);
-        ItemDto itemDto = ItemDto.builder()
-                .owner(user.getId())
-                .build();
+        ItemDto itemDto = new ItemDto();
+        itemDto.setOwner(user.getId());
         when(itemService.getUserById(any()))
                 .thenReturn(Optional.of(new User()));
         when(mockUserStorage.findById(any()))
@@ -245,9 +244,10 @@ class ItemServiceImplTest {
 
     @Test
     void findByItem_Id() {
+        var rez = List.of(new Comment());
         when(mockCommentStorage.findByItem_Id(any()))
-                .thenReturn(List.of(new Comment()));
-        Assertions.assertEquals(List.of(new Comment()), itemService.findByItem_Id(1L));
+                .thenReturn(rez);
+        Assertions.assertEquals(rez, itemService.findByItem_Id(1L));
     }
 
     @Test

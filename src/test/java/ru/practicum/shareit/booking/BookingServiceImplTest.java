@@ -116,6 +116,13 @@ class BookingServiceImplTest {
         Assertions.assertEquals(BookingMapper.toBookingDto(booking),
                 bookingServiceImpl.saveBooking(bookingDtoForCreate, userId));
 
+        Mockito
+                .when(mockBookingStorage.save(Mockito.any(Booking.class)))
+                .thenReturn(null);
+
+        Assertions.assertEquals(BookingMapper.toBookingDto(null),
+                bookingServiceImpl.saveBooking(bookingDtoForCreate, userId));
+
     }
 
 

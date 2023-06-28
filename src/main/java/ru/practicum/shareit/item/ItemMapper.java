@@ -24,14 +24,14 @@ public class ItemMapper {
     }
 
     public ItemDto toItemDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName() != null ? item.getName() : descriptionIfEnterDescriptionIsNull)
-                .description(item.getDescription() != null ? item.getDescription() : descriptionIfEnterDescriptionIsNull)
-                .available(item.getAvailable())
-                .owner(item.getOwner().getId())
-                .requestId(item.getRequestId() != null ? item.getRequestId().getId() : null)
-                .build();
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(item.getId());
+        itemDto.setName(item.getName() != null ? item.getName() : descriptionIfEnterDescriptionIsNull);
+        itemDto.setDescription(item.getDescription() != null ? item.getDescription() : descriptionIfEnterDescriptionIsNull);
+        itemDto.setAvailable(item.getAvailable());
+        itemDto.setOwner(item.getOwner().getId());
+        itemDto.setRequestId(item.getRequestId() != null ? item.getRequestId().getId() : null);
+        return itemDto;
     }
 
     public ItemDtoLastNextBookingAndComments toItemDtoLastNextBookingAndComments(
