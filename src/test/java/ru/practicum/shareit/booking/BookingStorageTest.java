@@ -23,7 +23,7 @@ class BookingStorageTest {
     ItemStorage itemStorage;
 
     @Test
-    void testOne(){
+    void testOne() {
         User user = new User();
         user.setEmail("asd@sd.ru");
         user.setName("asd");

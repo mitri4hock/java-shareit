@@ -135,7 +135,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void deleteItem() throws Exception{
+    void deleteItem() throws Exception {
         mockMvc.perform(delete("/items/1")
                         .content(mapper.writeValueAsString(new Item()))
                         .header("X-Sharer-User-Id", "1")
