@@ -31,21 +31,19 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceImplTest {
-
     @Mock
-    ItemStorage mockItemStorage;
+    private ItemStorage mockItemStorage;
     @Mock
-    UserStorage mockUserStorage;
+    private UserStorage mockUserStorage;
     @Mock
-    BookingStorage mockBookingStorage;
+    private BookingStorage mockBookingStorage;
     @Mock
-    CommentStorage mockCommentStorage;
+    private CommentStorage mockCommentStorage;
     @Mock
-    ItemRequestStorage mockItemRequestStorage;
-
-    ItemServiceImpl itemService;
-    User user;
-    Item item;
+    private ItemRequestStorage mockItemRequestStorage;
+    private ItemServiceImpl itemService;
+    private User user;
+    private Item item;
 
     @BeforeEach
     void createItemServiceImpl() {
@@ -63,7 +61,7 @@ class ItemServiceImplTest {
 
 
     @Test
-    void getUserById_AllTest() {
+    void getUserByIdAllTest() {
         when(mockUserStorage.findById(any()))
                 .thenReturn(Optional.empty());
         Assertions.assertEquals(Optional.empty(), itemService.getUserById(1L));
@@ -74,7 +72,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void createItem_AllTest() {
+    void createItemAllTest() {
         when(itemService.getUserById(any()))
                 .thenReturn(Optional.empty());
         Assertions.assertThrows(NotFoundParametrException.class, () -> {
@@ -112,7 +110,6 @@ class ItemServiceImplTest {
         item.setDescription("testDescription");
         item.setAvailable(true);
 
-
         when(mockItemStorage.findById(any()))
                 .thenReturn(Optional.empty());
         Assertions.assertThrows(BadParametrException.class, () -> {
@@ -141,7 +138,6 @@ class ItemServiceImplTest {
         when(mockItemStorage.findById(any()))
                 .thenReturn(Optional.of(new Item()));
         Assertions.assertEquals(new Item(), itemService.getItem(1L));
-
     }
 
     @Test
@@ -171,7 +167,6 @@ class ItemServiceImplTest {
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
-
         Assertions.assertEquals(rez, itemService.getAllMyItems(1L));
     }
 
@@ -242,7 +237,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void findByItem_Id() {
+    void findByItemId() {
         var rez = List.of(new Comment());
         when(mockCommentStorage.findByItem_Id(any()))
                 .thenReturn(rez);
@@ -253,7 +248,6 @@ class ItemServiceImplTest {
     void getItemLastNextBookingAndComments() {
         Booking booking = new Booking();
         booking.setBooker(user);
-
         Comment comment = new Comment();
         comment.setAuthor(user);
         user.setName("TestNAme");
@@ -274,9 +268,6 @@ class ItemServiceImplTest {
                 List.of(comment).stream()
                         .map(CommentMapper::toCommentDto)
                         .collect(Collectors.toList()));
-
         Assertions.assertEquals(rez, itemService.getItemLastNextBookingAndComments(1L, 1L));
-
-
     }
 }

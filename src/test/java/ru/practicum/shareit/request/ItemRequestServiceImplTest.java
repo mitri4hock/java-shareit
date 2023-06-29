@@ -26,17 +26,16 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ItemRequestServiceImplTest {
-
     @Mock
-    ItemRequestStorage mockItemRequestStorage;
+    private ItemRequestStorage mockItemRequestStorage;
     @Mock
-    ItemStorage mockItemStorage;
+    private ItemStorage mockItemStorage;
     @Mock
-    UserStorage mockUserStorage;
-    ItemRequestServiceImpl itemRequestService;
-    User user;
-    Item item;
-    ItemRequest itemRequest;
+    private UserStorage mockUserStorage;
+    private ItemRequestServiceImpl itemRequestService;
+    private User user;
+    private Item item;
+    private ItemRequest itemRequest;
 
     @BeforeEach
     void set_up() {
@@ -97,13 +96,6 @@ class ItemRequestServiceImplTest {
 
     @Test
     void findAllRequest() {
-        Assertions.assertThrows(BadParametrException.class, () -> {
-            itemRequestService.findAllRequest(0, 0, 100L);
-        });
-        Assertions.assertThrows(BadParametrException.class, () -> {
-            itemRequestService.findAllRequest(-1, 1, 100L);
-        });
-
         when(mockItemRequestStorage.findAllByOrderByCreatedDesc())
                 .thenReturn(List.of(itemRequest));
         when(mockItemStorage.findByRequestId_IdOrderByIdAsc(any()))

@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestForCreateDto;
@@ -26,12 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class ItemRequestControllerTest {
     @Mock
-    ItemRequestService itemRequestService;
+    private ItemRequestService itemRequestService;
     @InjectMocks
-    ItemRequestController itemRequestController;
+    private ItemRequestController itemRequestController;
     private MockMvc mockMvc;
-    ObjectMapper mapper = new ObjectMapper();
-    BookingDto returnObject;
+    private ObjectMapper mapper = new ObjectMapper();
+    private BookingDto returnObject;
 
     @BeforeEach
     void setUp() {
@@ -52,10 +53,9 @@ class ItemRequestControllerTest {
 
         when(itemRequestService.createItemRequest(any(), any()))
                 .thenReturn(ItemRequestDto.builder().build());
-
         mockMvc.perform(post("/requests")
                         .content(mapper.writeValueAsString(itemRequestForCreateDto))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -68,7 +68,7 @@ class ItemRequestControllerTest {
                 .thenReturn(List.of(ItemRequestDto.builder().build()));
 
         mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -81,7 +81,7 @@ class ItemRequestControllerTest {
                 .thenReturn(List.of(ItemRequestDto.builder().build()));
 
         mockMvc.perform(get("/requests/all?from=1&size=1")
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -94,7 +94,7 @@ class ItemRequestControllerTest {
                 .thenReturn(ItemRequestDto.builder().build());
 
         mockMvc.perform(get("/requests/1")
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

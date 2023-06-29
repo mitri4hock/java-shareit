@@ -3,13 +3,13 @@ package ru.practicum.shareit.booking;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoForCreate;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.EnumState;
 import ru.practicum.shareit.booking.model.EnumStatusBooking;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
@@ -105,81 +105,70 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundParametrException(String.format("Запрошены бронирования от несуществующего пользователя." +
                     " Id = %d", userId));
         }
-        if ((from != null && from < 0) || (size != null && size < 1)) {
-            throw new BadParametrException(String.format("При запросе ItemRequest были переданы неверные параметры: " +
-                    "from: %d, size: %d", from, size));
+        List<Booking> preRez = new ArrayList<>();
+        EnumState stateEnum;
+        try {
+            stateEnum = EnumState.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
         }
-        List<Booking> preRez;
 
         if (from == null && size == null) {
-            switch (state) {
-                case "ALL":
+            switch (stateEnum) {
+                case ALL:
                     preRez = bookingStorage.findByBooker_IdOrderByStartDesc(userId);
                     break;
-                case "CURRENT":
+                case CURRENT:
                     preRez = bookingStorage.findByBooker_IdAndStartBeforeAndEndAfterOrderByIdAsc(userId,
                             LocalDateTime.now(), LocalDateTime.now());
                     break;
-                case "PAST":
+                case PAST:
                     preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
                     break;
-                case "FUTURE":
+                case FUTURE:
                     preRez = bookingStorage.findByBooker_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
                     break;
-                case "WAITING":
+                case WAITING:
                     preRez = bookingStorage.findByBooker_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
                     break;
-                case "REJECTED":
+                case REJECTED:
                     preRez = bookingStorage.findByBooker_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.REJECTED);
                     break;
-                default:
-                    throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
             }
         } else {
-            switch (state) {
-                case "ALL":
+            switch (stateEnum) {
+                case ALL:
                     Sort sortBy = Sort.by(Sort.Order.desc("start"));
-                    Pageable page = PageRequest.of(from, size, sortBy);
+                    Pageable page = new CustomPageRequest(from, size, sortBy);
                     Page<Booking> prePreRez = bookingStorage.findByBooker_Id(userId, page);
-                    var totalElements = prePreRez.getTotalElements();
-                    if (from > totalElements) {
-                        throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
-                    }
-                    if (from + size > totalElements) {
-                        int sizeNew = (int) totalElements - from;
-                        page = PageRequest.of(from, sizeNew, sortBy);
-                        prePreRez = bookingStorage.findByBooker_Id(userId, page);
-                    }
                     preRez = prePreRez.getContent();
                     break;
-                case "CURRENT":
+                case CURRENT:
                     Sort sortByCurrent = Sort.by(Sort.Order.asc("id"));
-                    Pageable pageCurrent = PageRequest.of(from, size, sortByCurrent);
+                    Pageable pageCurrent = new CustomPageRequest(from, size, sortByCurrent);
                     preRez = bookingStorage.findByBooker_IdAndStartBeforeAndEndAfter(userId,
                             LocalDateTime.now(), LocalDateTime.now(), pageCurrent);
                     break;
-                case "PAST":
+                case PAST:
                     Sort sortByPast = Sort.by(Sort.Order.desc("start"));
-                    Pageable pagePast = PageRequest.of(from, size, sortByPast);
+                    Pageable pagePast = new CustomPageRequest(from, size, sortByPast);
                     preRez = bookingStorage.findByBooker_IdAndEndBefore(userId, LocalDateTime.now(), pagePast);
                     break;
-                case "FUTURE":
+                case FUTURE:
                     Sort sortByFuture = Sort.by(Sort.Order.desc("start"));
-                    Pageable pageFuture = PageRequest.of(from, size, sortByFuture);
+                    Pageable pageFuture = new CustomPageRequest(from, size, sortByFuture);
                     preRez = bookingStorage.findByBooker_IdAndStartAfter(userId, LocalDateTime.now(), pageFuture);
                     break;
-                case "WAITING":
+                case WAITING:
                     Sort sortByWaiting = Sort.by(Sort.Order.desc("start"));
-                    Pageable pageWaiting = PageRequest.of(from, size, sortByWaiting);
+                    Pageable pageWaiting = new CustomPageRequest(from, size, sortByWaiting);
                     preRez = bookingStorage.findByBooker_IdAndStatus(userId, EnumStatusBooking.WAITING, pageWaiting);
                     break;
-                case "REJECTED":
+                case REJECTED:
                     Sort sortByRejected = Sort.by(Sort.Order.desc("start"));
-                    Pageable pageRejected = PageRequest.of(from, size, sortByRejected);
+                    Pageable pageRejected = new CustomPageRequest(from, size, sortByRejected);
                     preRez = bookingStorage.findByBooker_IdAndStatus(userId, EnumStatusBooking.REJECTED, pageRejected);
                     break;
-                default:
-                    throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
             }
         }
         return preRez.stream()
@@ -199,64 +188,62 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundParametrException(String.format("Запрошены бронирования от несуществующего пользователя." +
                     " Id = %d", userId));
         }
-        if ((from != null && from < 0) || (size != null && size < 1)) {
-            throw new BadParametrException(String.format("При запросе ItemRequest были переданы неверные параметры: " +
-                    "from: %d, size: %d", from, size));
-        }
         if (countItemForUser(userId) == 0L) {
             return new ArrayList<>();
         }
-        List<Booking> preRez;
+        List<Booking> preRez = new ArrayList<>();
+        EnumState stateEnum;
+        try {
+            stateEnum = EnumState.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
+        }
         if (from == null && size == null) {
-            switch (state) {
-                case "ALL":
+            switch (stateEnum) {
+                case ALL:
                     preRez = bookingStorage.findByItem_Owner_IdOrderByStartDesc(userId);
                     break;
-                case "CURRENT":
+                case CURRENT:
                     preRez = bookingStorage.findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
                             LocalDateTime.now(), LocalDateTime.now());
                     break;
-                case "PAST":
+                case PAST:
                     preRez = bookingStorage.findByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
                     break;
-                case "FUTURE":
+                case FUTURE:
                     preRez = bookingStorage.findByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
                     break;
-                case "WAITING":
+                case WAITING:
                     preRez = bookingStorage.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.WAITING);
                     break;
-                case "REJECTED":
+                case REJECTED:
                     preRez = bookingStorage.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, EnumStatusBooking.REJECTED);
                     break;
-                default:
-                    throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
             }
         } else {
             Sort sortByStart = Sort.by(Sort.Order.desc("start"));
-            Pageable pageStart = PageRequest.of(from, size, sortByStart);
+            Pageable pageStart = new CustomPageRequest(from, size, sortByStart);
 
-            switch (state) {
-                case "ALL":
+            switch (stateEnum) {
+                case ALL:
                     preRez = bookingStorage.findByItem_Owner_Id(userId, pageStart);
                     break;
-                case "CURRENT":
+                case CURRENT:
                     preRez = bookingStorage.findByItem_Owner_IdAndStartBeforeAndEndAfter(userId,
                             LocalDateTime.now(), LocalDateTime.now(), pageStart);
                     break;
-                case "PAST":
+                case PAST:
                     preRez = bookingStorage.findByItem_Owner_IdAndEndBefore(userId, LocalDateTime.now(), pageStart);
                     break;
-                case "FUTURE":
+                case FUTURE:
                     preRez = bookingStorage.findByItem_Owner_IdAndStartAfter(userId, LocalDateTime.now(), pageStart);
                     break;
-                case "WAITING":
+                case WAITING:
                     preRez = bookingStorage.findByItem_Owner_IdAndStatus(userId, EnumStatusBooking.WAITING, pageStart);
                     break;
-                case "REJECTED":
+                case REJECTED:
                     preRez = bookingStorage.findByItem_Owner_IdAndStatus(userId, EnumStatusBooking.REJECTED, pageStart);
                     break;
-                default:
-                    throw new BadParametrException("Unknown state: UNSUPPORTED_STATUS");
             }
         }
         return preRez.stream()

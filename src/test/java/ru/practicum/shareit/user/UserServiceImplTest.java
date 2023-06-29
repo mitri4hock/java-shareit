@@ -19,20 +19,18 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-
     @Mock
-    UserStorage mockUserStorage;
-
-    UserServiceImpl userService;
-    User user;
+    private UserStorage mockUserStorage;
+    private UserServiceImpl userService;
+    private User user;
 
     @BeforeEach
-    void set_up() {
+    void Begin() {
         userService = new UserServiceImpl(mockUserStorage);
     }
 
     @BeforeEach
-    void createuser() {
+    void createUserForTest() {
         user = new User();
         user.setName("testName");
         user.setEmail("test@test.test");
@@ -43,7 +41,6 @@ class UserServiceImplTest {
         when(mockUserStorage.save(any()))
                 .thenReturn(new User());
         Assertions.assertEquals(UserMapper.toUserDto(new User()), userService.createUser(new User()));
-
     }
 
     @Test
@@ -74,15 +71,12 @@ class UserServiceImplTest {
         var rez = List.of(user).stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
-
         Assertions.assertEquals(rez, userService.getAllUsers());
     }
 
     @Test
     void deleteUserById() {
-
         userService.deleteUserById(1L);
         Mockito.verify(mockUserStorage, Mockito.times(1)).deleteById(1L);
-
     }
 }

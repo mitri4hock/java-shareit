@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -26,12 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
     @Mock
-    UserService userService;
+    private UserService userService;
     @InjectMocks
-    UserController userController;
+    private UserController userController;
     private MockMvc mockMvc;
-    ObjectMapper mapper = new ObjectMapper();
-    BookingDto returnObject;
+    private ObjectMapper mapper = new ObjectMapper();
+    private BookingDto returnObject;
 
     @BeforeEach
     void setUp() {
@@ -48,8 +49,7 @@ class UserControllerTest {
         user.setEmail("testEmail@test.test");
 
         when(userService.createUser(any())).thenReturn(UserDto.builder().build());
-
-        mockMvc.perform(post("/users").content(mapper.writeValueAsString(user)).header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+        mockMvc.perform(post("/users").content(mapper.writeValueAsString(user)).header(BookingController.HEADER_USER_ID_FIELD, "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
     }
 
     @Test
@@ -59,29 +59,26 @@ class UserControllerTest {
         user.setEmail("testEmail@test.test");
 
         when(userService.patchUser(any(), any())).thenReturn(UserDto.builder().build());
-
-        mockMvc.perform(patch("/users/1").content(mapper.writeValueAsString(user)).header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+        mockMvc.perform(patch("/users/1").content(mapper.writeValueAsString(user)).header(BookingController.HEADER_USER_ID_FIELD, "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
     void getUserById() throws Exception {
         when(userService.getUserById(any())).thenReturn(UserDto.builder().build());
-
-        mockMvc.perform(get("/users/1").header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+        mockMvc.perform(get("/users/1").header(BookingController.HEADER_USER_ID_FIELD, "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
     void getAllUsers() throws Exception {
         when(userService.getAllUsers()).thenReturn(List.of(UserDto.builder().build()));
-
-        mockMvc.perform(get("/users").header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+        mockMvc.perform(get("/users").header(BookingController.HEADER_USER_ID_FIELD, "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
     void deleteUserById() throws Exception {
-        mockMvc.perform(delete("/users/1").header("X-Sharer-User-Id", "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-
+        mockMvc.perform(delete("/users/1").header(BookingController.HEADER_USER_ID_FIELD, "1")
+                .characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
         Mockito.verify(userService, Mockito.times(1)).deleteUserById(1L);
-
     }
 }

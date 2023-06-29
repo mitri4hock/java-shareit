@@ -59,8 +59,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getRequestId() != null) {
             item.setRequestId(itemRequestStorage.findById(itemDto.getRequestId()).orElse(null));
         }
-        var rez = itemStorage.save(item);
-        return ItemMapper.toItemDto(rez);
+        return ItemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override

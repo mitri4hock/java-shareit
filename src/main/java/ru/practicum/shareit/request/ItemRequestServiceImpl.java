@@ -2,11 +2,11 @@ package ru.practicum.shareit.request;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.CustomPageRequest;
 import ru.practicum.shareit.exceptions.BadParametrException;
 import ru.practicum.shareit.exceptions.NotFoundParametrException;
 import ru.practicum.shareit.item.ItemMapper;
@@ -67,12 +67,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                                     .collect(Collectors.toList())))
                     .collect(Collectors.toList());
         }
-        if (from < 0 || size < 1) {
-            throw new BadParametrException(String.format("При запросе ItemRequest были переданы неверные параметры: " +
-                    "from: %d, size: %d", from, size));
-        }
         Sort sortById = Sort.by(Sort.Order.desc("created"));
-        Pageable page = PageRequest.of(from, size, sortById);
+        Pageable page = new CustomPageRequest(from, size, sortById);
         var itemRequestPage = itemRequestStorage.findByRequestor_Id(userId, page);
         return itemRequestPage.stream()
                 .map(x -> ItemRequestMapper.toItemRequstDto(x,

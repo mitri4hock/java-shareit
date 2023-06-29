@@ -26,14 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class BookingControllerTest {
-
     @Mock
-    BookingService bookingService;
+    private BookingService bookingService;
     @InjectMocks
-    BookingController bookingController;
+    private BookingController bookingController;
     private MockMvc mockMvc;
-    ObjectMapper mapper = new ObjectMapper();
-    BookingDto returnObject;
+    private ObjectMapper mapper = new ObjectMapper();
+    private BookingDto returnObject;
 
     @BeforeEach
     void setUp() {
@@ -54,52 +53,45 @@ class BookingControllerTest {
         bookingDtoForCreate.setItemId(1L);
         bookingDtoForCreate.setStart(LocalDateTime.now().plusDays(1L));
         bookingDtoForCreate.setEnd(LocalDateTime.now().plusDays(2L));
-
         when(bookingService.saveBooking(any(), any()))
                 .thenReturn(returnObject);
-
         mockMvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoForCreate))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(returnObject.getId()))
                 .andDo(MockMvcResultHandlers.print());
-
         bookingDtoForCreate.setItemId(null);
         mockMvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoForCreate))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
-
     }
 
     @Test
     void verificationBooking() throws Exception {
         when(bookingService.updateApproved(any(), any(), any()))
                 .thenReturn(returnObject);
-
         mockMvc.perform(patch("/bookings/1?approved=true")
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
     }
 
     @Test
     void getBooking() throws Exception {
         when(bookingService.findBookingById(any(), any()))
                 .thenReturn(returnObject);
-
         mockMvc.perform(get("/bookings/1")
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -110,9 +102,8 @@ class BookingControllerTest {
     void findAllBookingWithStatus() throws Exception {
         when(bookingService.findAllBookingWithStatus(any(), any(), any(), any()))
                 .thenReturn(List.of(returnObject));
-
         mockMvc.perform(get("/bookings?state=All,from=0,size=1")
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -123,9 +114,8 @@ class BookingControllerTest {
     void findAllBookingForUserWithStatus() throws Exception {
         when(bookingService.findAllBookingForUserWithStatus(any(), any(), any(), any()))
                 .thenReturn(List.of(returnObject));
-
         mockMvc.perform(get("/bookings/owner?state=ALL,from=0,size=1")
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

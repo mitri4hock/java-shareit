@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoLastNextBookingAndComments;
@@ -28,11 +29,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class ItemControllerTest {
     @Mock
-    ItemService itemService;
+    private ItemService itemService;
     @InjectMocks
-    ItemController itemController;
+    private ItemController itemController;
     private MockMvc mockMvc;
-    ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -51,10 +52,9 @@ class ItemControllerTest {
 
         when(itemService.createItem(any(), any()))
                 .thenReturn(itemDto);
-
         mockMvc.perform(post("/items")
                         .content(mapper.writeValueAsString(itemDto))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -68,10 +68,9 @@ class ItemControllerTest {
 
         when(itemService.createComment(any(), any(), any()))
                 .thenReturn(CommentDto.builder().build());
-
         mockMvc.perform(post("/items/1/comment")
                         .content(mapper.writeValueAsString(comment))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -85,7 +84,7 @@ class ItemControllerTest {
 
         mockMvc.perform(patch("/items/1")
                         .content(mapper.writeValueAsString(new Item()))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -99,7 +98,7 @@ class ItemControllerTest {
 
         mockMvc.perform(get("/items/1")
                         .content(mapper.writeValueAsString(new Item()))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -113,7 +112,7 @@ class ItemControllerTest {
 
         mockMvc.perform(get("/items")
                         .content(mapper.writeValueAsString(new Item()))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -127,7 +126,7 @@ class ItemControllerTest {
 
         mockMvc.perform(get("/items/search?text=sdf")
                         .content(mapper.writeValueAsString(new Item()))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -138,13 +137,12 @@ class ItemControllerTest {
     void deleteItem() throws Exception {
         mockMvc.perform(delete("/items/1")
                         .content(mapper.writeValueAsString(new Item()))
-                        .header("X-Sharer-User-Id", "1")
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         Mockito.verify(itemService, Mockito.times(1)).deleteItem(1L);
-
     }
 }

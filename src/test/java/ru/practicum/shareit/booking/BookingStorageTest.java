@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 @DataJpaTest
 class BookingStorageTest {
     @Autowired
-    BookingStorage bookingStorage;
+    private BookingStorage bookingStorage;
     @Autowired
-    UserStorage userStorage;
+    private UserStorage userStorage;
     @Autowired
-    ItemStorage itemStorage;
+    private ItemStorage itemStorage;
 
     @Test
     void testOne() {
@@ -34,7 +34,6 @@ class BookingStorageTest {
         item.setAvailable(true);
         item.setOwner(user);
         itemStorage.save(item);
-
 
         Booking booking = new Booking();
         Assertions.assertNull(booking.getId());
