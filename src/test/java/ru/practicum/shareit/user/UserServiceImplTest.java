@@ -25,7 +25,7 @@ class UserServiceImplTest {
     private User user;
 
     @BeforeEach
-    void Begin() {
+    void begin() {
         userService = new UserServiceImpl(mockUserStorage);
     }
 

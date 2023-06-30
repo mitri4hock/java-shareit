@@ -49,7 +49,22 @@ class UserControllerTest {
         user.setEmail("testEmail@test.test");
 
         when(userService.createUser(any())).thenReturn(UserDto.builder().build());
-        mockMvc.perform(post("/users").content(mapper.writeValueAsString(user)).header(BookingController.HEADER_USER_ID_FIELD, "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+        mockMvc.perform(post("/users")
+                .content(mapper.writeValueAsString(user))
+                .header(BookingController.HEADER_USER_ID_FIELD, "1")
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        user.setName(null);
+        mockMvc.perform(post("/users")
+                        .content(mapper.writeValueAsString(user))
+                        .header(BookingController.HEADER_USER_ID_FIELD, "1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -59,7 +74,19 @@ class UserControllerTest {
         user.setEmail("testEmail@test.test");
 
         when(userService.patchUser(any(), any())).thenReturn(UserDto.builder().build());
-        mockMvc.perform(patch("/users/1").content(mapper.writeValueAsString(user)).header(BookingController.HEADER_USER_ID_FIELD, "1").characterEncoding(StandardCharsets.UTF_8).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+        mockMvc.perform(patch("/users/1")
+                .content(mapper.writeValueAsString(user))
+                .header(BookingController.HEADER_USER_ID_FIELD, "1")
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(patch("/users/1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
