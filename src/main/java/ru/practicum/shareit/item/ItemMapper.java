@@ -5,6 +5,7 @@ import ru.practicum.shareit.booking.dto.BookingDtoSmallBooker;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoLastNextBookingAndComments;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
@@ -14,14 +15,23 @@ public class ItemMapper {
 
     private final String descriptionIfEnterDescriptionIsNull = "not provided";
 
+    public Item toItem(ItemDto itemDto) {
+        Item rez = new Item();
+        rez.setName(itemDto.getName());
+        rez.setDescription(itemDto.getDescription());
+        rez.setAvailable(itemDto.getAvailable());
+        return rez;
+    }
+
     public ItemDto toItemDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName() != null ? item.getName() : descriptionIfEnterDescriptionIsNull)
-                .description(item.getDescription() != null ? item.getDescription() : descriptionIfEnterDescriptionIsNull)
-                .available(item.getAvailable())
-                .owner(item.getOwner().getId())
-                .build();
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(item.getId());
+        itemDto.setName(item.getName() != null ? item.getName() : descriptionIfEnterDescriptionIsNull);
+        itemDto.setDescription(item.getDescription() != null ? item.getDescription() : descriptionIfEnterDescriptionIsNull);
+        itemDto.setAvailable(item.getAvailable());
+        itemDto.setOwner(item.getOwner().getId());
+        itemDto.setRequestId(item.getRequestId() != null ? item.getRequestId().getId() : null);
+        return itemDto;
     }
 
     public ItemDtoLastNextBookingAndComments toItemDtoLastNextBookingAndComments(
@@ -38,6 +48,16 @@ public class ItemMapper {
                 .lastBooking(lastBooking)
                 .nextBooking(nextBooking)
                 .comments(comments)
+                .build();
+    }
+
+    public ItemForRequestDto toItemForRequestDto(Item item) {
+        return ItemForRequestDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getRequestId().getId())
                 .build();
     }
 

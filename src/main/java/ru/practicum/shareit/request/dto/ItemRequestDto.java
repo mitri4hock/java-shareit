@@ -2,10 +2,12 @@ package ru.practicum.shareit.request.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -14,8 +16,8 @@ public class ItemRequestDto {
     @Min(0)
     private Long id;
     private String description;
-    @Min(0)
-    private Long requestor;
     @NotNull
-    private Date created;
+    private LocalDateTime created;
+    @NotNull
+    private List<ItemForRequestDto> items;
 }

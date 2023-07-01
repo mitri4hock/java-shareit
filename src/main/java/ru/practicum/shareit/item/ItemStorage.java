@@ -28,5 +28,5 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
 
     long countDistinctByOwner_Id(Long id);
 
-
+    List<Item> findByRequestId_IdOrderByIdAsc(Long id);
 }

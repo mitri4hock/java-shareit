@@ -15,6 +15,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoLastNextBookingAndComments;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequestStorage;
 import ru.practicum.shareit.user.UserStorage;
 import ru.practicum.shareit.user.model.User;
 
@@ -36,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage userStorage;
     private final BookingStorage bookingStorage;
     private final CommentStorage commentStorage;
+    private final ItemRequestStorage itemRequestStorage;
 
     @Override
     public Optional<User> getUserById(Long userId) {
@@ -48,13 +50,16 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto createItem(Item item, Long userId) {
+    public ItemDto createItem(ItemDto itemDto, Long userId) {
         if (getUserById(userId).isEmpty()) {
             throw new NotFoundParametrException("при создании вещи, был указан несуществующий пользователь владелец");
         }
-        Item result = item;
-        result.setOwner(userStorage.findById(userId).get());
-        return ItemMapper.toItemDto(itemStorage.save(result));
+        Item item = ItemMapper.toItem(itemDto);
+        item.setOwner(userStorage.findById(userId).get());
+        if (itemDto.getRequestId() != null) {
+            item.setRequestId(itemRequestStorage.findById(itemDto.getRequestId()).orElse(null));
+        }
+        return ItemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override
@@ -139,9 +144,6 @@ public class ItemServiceImpl implements ItemService {
                     "пользователь комментатор");
         });
         var item = getItem(itemId);
-        if (item == null) {
-            throw new NotFoundParametrException("при создании комментария, была указана несуществующая вещь");
-        }
         var preRez = bookingStorage.findByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
         var booking = preRez.stream()
                 .map(BookingMapper::toBookingDto)

@@ -27,21 +27,25 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public UserDto patchUser(@RequestBody @NotNull User user, @PathVariable @NotNull Long userId) {
         return userService.patchUser(user, userId);
     }
 
     @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public UserDto getUserById(@PathVariable Long userId) {
         return userService.getUserById(userId);
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public void deleteUserById(@PathVariable Long userId) {
         userService.deleteUserById(userId);
     }

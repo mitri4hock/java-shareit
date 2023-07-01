@@ -15,7 +15,7 @@ public interface ItemService {
 
     Optional<User> getUserById(Long userId);
 
-    ItemDto createItem(Item item, Long userId);
+    ItemDto createItem(ItemDto  itemDto, Long userId);
 
     ItemDto patchItem(Item item, Long userId, Long itemId);
 
@@ -36,4 +36,6 @@ public interface ItemService {
     List<Comment> findByItem_Id(Long itemId);
 
     ItemDtoLastNextBookingAndComments getItemLastNextBookingAndComments(Long itemId, Long userId);
+
+
 }
