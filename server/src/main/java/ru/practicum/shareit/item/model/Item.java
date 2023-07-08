@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.model;
 
-import com.sun.istack.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -20,7 +19,6 @@ public class Item {
     private String name;
     @Column(name = "description")
     private String description;
-    @NotNull
     @Column(name = "available")
     private Boolean available;
     @ManyToOne()
