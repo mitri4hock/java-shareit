@@ -2,7 +2,7 @@ version: '3.8'
 services:
   db:
     image: postgres:13.7-alpine
-    container_name: db
+    container_name: shareit-db
     volumes:
       - /var/lib/postgresql/data/
     ports:
@@ -14,7 +14,7 @@ services:
 #      POSTGRES_HOST_AUTH_METHOD: trust
 
   server:
-    build: /server
+    build: server
     image: server_image
     container_name: server
     ports:
@@ -22,12 +22,12 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:6541/shareit
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=root1
 
   gateway:
-    build: /gateway
+    build: gateway
     image: gateway_image
     container_name: gateway
     ports:
