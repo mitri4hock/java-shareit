@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestForCreateDto;
+import ru.practicum.shareit.util.Constants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -25,13 +26,13 @@ public class RequestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createItemRequest(@RequestBody @Valid ItemRequestForCreateDto itemRequestForCreateDto,
-                                                    @RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+                                                    @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId) {
         return requestClient.createItemRequest(userId, itemRequestForCreateDto);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> findItemRequestForMe(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+    public ResponseEntity<Object> findItemRequestForMe(@RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId) {
         return requestClient.findItemRequestForMe(userId);
     }
 
@@ -39,14 +40,14 @@ public class RequestController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> findAllRequest(@RequestParam(value = "from", required = false) @PositiveOrZero Integer from,
                                                  @RequestParam(value = "size", required = false) @Positive Integer size,
-                                                 @RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+                                                 @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId) {
         return requestClient.findAllRequest(userId, from, size);
     }
 
     @GetMapping("/{requestId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> findItemRequestBuId(@PathVariable Long requestId,
-                                                      @RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+                                                      @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId) {
         return requestClient.findById(userId, requestId);
     }
 }

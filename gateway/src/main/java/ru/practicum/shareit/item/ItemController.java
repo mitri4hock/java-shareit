@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.util.Constants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -25,7 +26,7 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createItem(@RequestBody @Valid @NotNull ItemDto itemDto,
-                                             @RequestHeader("X-Sharer-User-Id") @NotNull long userId) {
+                                             @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull long userId) {
         return itemClient.createItem(userId, itemDto);
     }
 
@@ -33,14 +34,14 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> createComment(@RequestBody @Valid CommentDto comment,
                                                 @PathVariable @NotNull Long itemId,
-                                                @RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+                                                @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId) {
         return itemClient.createComment(userId, comment, itemId);
     }
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> patchItem(@RequestBody @NotNull ItemDto item,
-                                            @RequestHeader("X-Sharer-User-Id") @NotNull Long userId,
+                                            @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId,
                                             @PathVariable @NotNull Long itemId) {
         return itemClient.patchItem(itemId, userId, item);
     }
@@ -48,14 +49,14 @@ public class ItemController {
     @GetMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getItem(@PathVariable Long itemId,
-                                          @RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+                                          @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId) {
         return itemClient.getItemLastNextBookingAndComments(userId, itemId);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getAllMyItems(
-            @RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+            @RequestHeader(Constants.HEADER_USER_ID_FIELD) @NotNull Long userId) {
         return itemClient.getAllMyItems(userId);
     }
 
